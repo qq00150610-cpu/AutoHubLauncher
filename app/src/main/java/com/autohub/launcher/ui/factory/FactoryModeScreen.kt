@@ -1,6 +1,7 @@
 package com.autohub.launcher.ui.factory
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -184,14 +185,16 @@ private fun FactoryModeMainScreen(
             }
 
             if (uiState.systemInfo != null) {
+                val systemInfo = uiState.systemInfo
                 item {
-                    SystemInfoCard(uiState.systemInfo)
+                    SystemInfoCard(systemInfo)
                 }
             }
 
             if (uiState.deviceInfo != null) {
+                val deviceInfo = uiState.deviceInfo
                 item {
-                    DeviceInfoCard(uiState.deviceInfo)
+                    DeviceInfoCard(deviceInfo)
                 }
             }
 
@@ -463,7 +466,7 @@ private fun getFunctionIcon(function: FactoryFunction): androidx.compose.ui.grap
         FactoryFunction.LOG_EXPORT -> Icons.Default.Download
         FactoryFunction.FACTORY_RESET -> Icons.Default.Restore
         FactoryFunction.SYSTEM_UPDATE -> Icons.Default.SystemUpdate
-        FactoryFunction.DEVICE_INFO -> Icons.Default.DeviceInfo
+        FactoryFunction.DEVICE_INFO -> Icons.Default.Devices
     }
 }
 

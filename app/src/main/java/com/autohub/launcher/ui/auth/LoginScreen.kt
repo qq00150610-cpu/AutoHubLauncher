@@ -260,12 +260,12 @@ fun LoginScreen(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // 微信登录按钮
                     IconButton(
                         onClick = {
-                            viewModel.loginWithWeChat(context)
+                            viewModel.loginWithWeChat(context as android.app.Activity)
                         },
                         modifier = Modifier
                             .size(56.dp)

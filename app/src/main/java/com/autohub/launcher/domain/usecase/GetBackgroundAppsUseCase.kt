@@ -20,15 +20,19 @@ class GetBackgroundAppsUseCase @Inject constructor(
         val backgroundApps = runningTasks
             .mapNotNull { task ->
                 task.topActivity?.let { activityInfo ->
-                    AppInfo(
-                        packageName = activityInfo.packageName,
-                        name = try {
-                            activityInfo.applicationInfo?.loadLabel(context.packageManager)?.toString() 
-                                ?: activityInfo.packageName
-                        } catch (e: Exception) {
-                            activityInfo.packageName
-                        }
-                    )
+                    try {
+                        val appInfo = context.packageManager.getApplicationInfo(activityInfo.packageName, 0)
+                        val appName = context.packageManager.getApplicationLabel(appInfo).toString()
+                        AppInfo(
+                            packageName = activityInfo.packageName,
+                            name = appName
+                        )
+                    } catch (e: Exception) {
+                        AppInfo(
+                            packageName = activityInfo.packageName,
+                            name = activityInfo.packageName
+                        )
+                    }
                 }
             }
             .distinctBy { it.packageName }

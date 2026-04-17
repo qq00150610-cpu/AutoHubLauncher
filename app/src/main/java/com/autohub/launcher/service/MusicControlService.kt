@@ -42,7 +42,14 @@ class MusicControlService : Service() {
 
     fun playPause() {
         try {
-            mediaController?.transportControls?.playPause()
+            mediaController?.let { controller ->
+                val playbackState = controller.playbackState
+                if (playbackState != null && playbackState.state == android.media.session.PlaybackState.STATE_PLAYING) {
+                    controller.transportControls.pause()
+                } else {
+                    controller.transportControls.play()
+                }
+            }
         } catch (e: Exception) {
             // Handle playback control error
         }
@@ -64,28 +71,5 @@ class MusicControlService : Service() {
         }
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mediaController?.unregisterCallback(callback)
-    }
-
-    private val callback = object : MediaController.Callback() {
-        override fun onPlaybackStateChanged(state: android.media.session.PlaybackState?) {
-            super.onPlaybackStateChanged(state)
-            updateNotification()
-        }
-
-        override fun onMetadataChanged(metadata: android.media.MediaMetadata?) {
-            super.onMetadataChanged(metadata)
-            updateNotification()
-        }
-    }
-
-    private fun updateNotification() {
-        // TODO: Update music notification with current track info
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 }

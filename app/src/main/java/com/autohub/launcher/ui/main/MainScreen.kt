@@ -251,7 +251,7 @@ private fun SmartCard(
     val cardHeight = screenDims.scaledSize(100.dp)
     val padding = screenDims.scaledSize(12.dp)
     val cornerRadius = screenDims.cardCornerRadius
-    val fontSize = with(screenDims) { scaledSize(14.sp.value.dp) }
+    val fontSize = with(screenDims) { scaledSize(14.sp.value.dp).value.sp }
     
     Surface(
         modifier = modifier.height(cardHeight),

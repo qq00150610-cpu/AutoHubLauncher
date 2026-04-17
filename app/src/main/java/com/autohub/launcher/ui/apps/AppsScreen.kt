@@ -161,34 +161,22 @@ private fun SortOptionsRow(
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        AssistChip(
+        FilterChip(
+            selected = currentSort == AppSortBy.NAME,
             onClick = { onSortChanged(AppSortBy.NAME) },
-            label = { Text("名称") },
-            border = if (currentSort == AppSortBy.NAME) {
-                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-            } else {
-                null
-            }
+            label = { Text("名称") }
         )
 
-        AssistChip(
+        FilterChip(
+            selected = currentSort == AppSortBy.SIZE,
             onClick = { onSortChanged(AppSortBy.SIZE) },
-            label = { Text("大小") },
-            border = if (currentSort == AppSortBy.SIZE) {
-                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-            } else {
-                null
-            }
+            label = { Text("大小") }
         )
 
-        AssistChip(
+        FilterChip(
+            selected = currentSort == AppSortBy.INSTALL_TIME,
             onClick = { onSortChanged(AppSortBy.INSTALL_TIME) },
-            label = { Text("安装时间") },
-            border = if (currentSort == AppSortBy.INSTALL_TIME) {
-                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-            } else {
-                null
-            }
+            label = { Text("安装时间") }
         )
     }
 }
@@ -202,10 +190,7 @@ private fun AppGridItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(
-                onClick = onAppClick,
-                onLongClick = onAppLongClick
-            ),
+            .clickable(onClick = onAppClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

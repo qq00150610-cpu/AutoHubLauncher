@@ -37,7 +37,7 @@ class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
         when (resp.type) {
             1 -> { // 登录响应
                 val authResp = resp as SendAuth.Resp
-                loginViewModel.handleWeChatLoginResult(resp.errCode, authResp)
+                loginViewModel.handleWeChatLoginResult(authResp)
             }
             else -> {
                 // 其他响应
