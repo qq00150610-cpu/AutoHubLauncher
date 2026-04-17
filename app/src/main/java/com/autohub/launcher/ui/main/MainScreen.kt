@@ -32,7 +32,6 @@ import com.autohub.launcher.domain.model.AppInfo
 import com.autohub.launcher.domain.model.WeatherInfo
 import com.autohub.launcher.ui.theme.rememberScreenDimensions
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
