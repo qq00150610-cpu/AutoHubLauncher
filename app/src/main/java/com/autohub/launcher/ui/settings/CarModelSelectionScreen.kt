@@ -102,7 +102,7 @@ fun CarModelSelectionScreen(
                 item {
                     val selectedAdapter = carAdapters.find { it.manufacturer == expandedManufacturer }
                     selectedAdapter?.let { adapter ->
-                        adapter.supportedModels.forEach { model ->
+                        adapter.supportedModels.forEach { model: String ->
                             CarModelItem(
                                 model = model,
                                 isSelected = model == selectedModel,
