@@ -32,7 +32,7 @@ fun CarModelSelectionScreen(
 ) {
     val selectedManufacturer by viewModel.selectedManufacturer.collectAsState()
     val selectedModel by viewModel.selectedCarModel.collectAsState()
-    val carAdapters = viewModel.availableCarAdapters.collectAsState()
+    val carAdapters = viewModel.availableCarAdapters
 
     var expandedManufacturer by remember { mutableStateOf(selectedManufacturer) }
 
@@ -73,8 +73,8 @@ fun CarModelSelectionScreen(
                 )
             }
 
-            items(carAdapters.value.size) { index ->
-                val adapter = carAdapters.value[index]
+            items(carAdapters.size) { index ->
+                val adapter = carAdapters[index]
                 ManufacturerItem(
                     manufacturer = adapter.manufacturer,
                     supportedModels = adapter.supportedModels,
@@ -100,7 +100,7 @@ fun CarModelSelectionScreen(
             }
 
             val selectedAdapter = if (expandedManufacturer.isNotEmpty()) {
-                carAdapters.value.find { adapter -> adapter.manufacturer == expandedManufacturer }
+                carAdapters.find { adapter -> adapter.manufacturer == expandedManufacturer }
             } else {
                 null
             }
