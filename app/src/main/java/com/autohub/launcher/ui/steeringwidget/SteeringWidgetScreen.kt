@@ -40,7 +40,11 @@ fun SteeringWidgetScreen(
         topBar = {
             SteeringWidgetTopBar(
                 onBack = onBack,
-                onExport = { viewModel.onExportProfile(uiState.currentProfile ?: return) },
+                onExport = { 
+                    uiState.currentProfile?.let { profile ->
+                        viewModel.onExportProfile(profile)
+                    }
+                },
                 onImport = { viewModel.onImportProfile() }
             )
         }
