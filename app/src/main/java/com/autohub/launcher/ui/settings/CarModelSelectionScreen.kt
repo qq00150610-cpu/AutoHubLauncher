@@ -73,17 +73,16 @@ fun CarModelSelectionScreen(
                 )
             }
 
-            item {
-                carAdapters.forEach { adapter ->
-                    ManufacturerItem(
-                        manufacturer = adapter.manufacturer,
-                        supportedModels = adapter.supportedModels,
-                        isSelected = adapter.manufacturer == selectedManufacturer,
-                        onClick = {
-                            expandedManufacturer = adapter.manufacturer
-                        }
-                    )
-                }
+            items(carAdapters.value.size) { index ->
+                val adapter = carAdapters.value[index]
+                ManufacturerItem(
+                    manufacturer = adapter.manufacturer,
+                    supportedModels = adapter.supportedModels,
+                    isSelected = adapter.manufacturer == selectedManufacturer,
+                    onClick = {
+                        expandedManufacturer = adapter.manufacturer
+                    }
+                )
             }
 
             // 车型选择
@@ -99,19 +98,18 @@ fun CarModelSelectionScreen(
                     )
                 }
 
-                item {
-                    val selectedAdapter = carAdapters.find { it.manufacturer == expandedManufacturer }
-                    selectedAdapter?.let { adapter ->
-                        adapter.supportedModels.forEach { model: String ->
-                            CarModelItem(
-                                model = model,
-                                isSelected = model == selectedModel,
-                                onClick = {
-                                    viewModel.selectCarModel(adapter.manufacturer, model)
-                                    onModelSelected(adapter.manufacturer, model)
-                                }
-                            )
-                        }
+                val selectedAdapter = carAdapters.value.find { it.manufacturer == expandedManufacturer }
+                if (selectedAdapter != null) {
+                    items(selectedAdapter.supportedModels.size) { index ->
+                        val model = selectedAdapter.supportedModels[index]
+                        CarModelItem(
+                            model = model,
+                            isSelected = model == selectedModel,
+                            onClick = {
+                                viewModel.selectCarModel(selectedAdapter.manufacturer, model)
+                                onModelSelected(selectedAdapter.manufacturer, model)
+                            }
+                        )
                     }
                 }
             }
