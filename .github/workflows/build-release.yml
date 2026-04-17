@@ -21,6 +21,11 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
+    - name: Create debug keystore for signing
+      run: |
+        mkdir -p ~/.android
+        keytool -genkeypair -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+    
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
