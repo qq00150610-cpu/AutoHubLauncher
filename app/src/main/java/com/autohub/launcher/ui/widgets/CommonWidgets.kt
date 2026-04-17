@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.SkipNext
+import androidx.compose.material.icons.automirrored.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -236,7 +237,7 @@ fun MiniPlayerWidget(
             ) {
                 IconButton(onClick = onPrevious, modifier = Modifier.size(40.dp)) {
                     Icon(
-                        Icons.Default.SkipPrevious,
+                        Icons.AutoMirrored.Filled.SkipPrevious,
                         contentDescription = "上一首",
                         modifier = Modifier.size(24.dp)
                     )
@@ -244,7 +245,7 @@ fun MiniPlayerWidget(
 
                 IconButton(onClick = onPlayPause, modifier = Modifier.size(40.dp)) {
                     Icon(
-                        if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         contentDescription = "播放/暂停",
                         modifier = Modifier.size(24.dp)
                     )
