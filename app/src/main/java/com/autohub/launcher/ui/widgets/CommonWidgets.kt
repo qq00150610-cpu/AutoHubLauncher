@@ -6,8 +6,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.automirrored.filled.SkipNext
-import androidx.compose.material.icons.automirrored.filled.SkipPrevious
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -83,7 +83,7 @@ fun WeatherWidget(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Default.WaterDrop,
+                            Icons.Rounded.WaterDrop,
                             contentDescription = "湿度",
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -102,7 +102,7 @@ fun WeatherWidget(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            Icons.Default.Air,
+                            Icons.Rounded.Air,
                             contentDescription = "风速",
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -237,7 +237,7 @@ fun MiniPlayerWidget(
             ) {
                 IconButton(onClick = onPrevious, modifier = Modifier.size(40.dp)) {
                     Icon(
-                        Icons.AutoMirrored.Filled.SkipPrevious,
+                        Icons.Rounded.SkipPrevious,
                         contentDescription = "上一首",
                         modifier = Modifier.size(24.dp)
                     )
@@ -245,7 +245,7 @@ fun MiniPlayerWidget(
 
                 IconButton(onClick = onPlayPause, modifier = Modifier.size(40.dp)) {
                     Icon(
-                        if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                         contentDescription = "播放/暂停",
                         modifier = Modifier.size(24.dp)
                     )
@@ -253,7 +253,7 @@ fun MiniPlayerWidget(
 
                 IconButton(onClick = onNext, modifier = Modifier.size(40.dp)) {
                     Icon(
-                        Icons.AutoMirrored.Filled.SkipNext,
+                        Icons.Rounded.SkipNext,
                         contentDescription = "下一首",
                         modifier = Modifier.size(24.dp)
                     )
