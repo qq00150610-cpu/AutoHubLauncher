@@ -67,7 +67,9 @@ enum class SteeringWheelKey(val keyCode: Int) {
     NAV_UP(19),
     NAV_DOWN(20),
     NAV_LEFT(21),
-    NAV_RIGHT(22)
+    NAV_RIGHT(22),
+    NAV_OK(23),
+    NAV_BACK(24)
 }
 
 /**

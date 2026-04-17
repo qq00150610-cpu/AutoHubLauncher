@@ -15,7 +15,7 @@ data class AppDetails(
     val appName: String,
     val versionName: String,
     val versionCode: Long,
-    val icon: Int,
+    val icon: Any, // android.graphics.drawable.Drawable
     val isSystemApp: Boolean,
     val size: Long,
     val cacheSize: Long,

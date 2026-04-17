@@ -38,7 +38,7 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val currentUser by viewModel.currentUser.collectAsState()
+    val currentUser by viewModel.currentUser.collectAsState(initial = null)
 
     Scaffold(
         topBar = {

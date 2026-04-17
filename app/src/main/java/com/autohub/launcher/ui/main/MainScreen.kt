@@ -98,7 +98,8 @@ private fun TopBar(
     screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
 ) {
     val padding = screenDims.contentPadding
-    val fontSize = with(screenDims) { scaledSize(16.sp.value.dp) }
+    val baseFontSize = with(screenDims) { scaledSize(16.sp.value.dp) }
+    val baseFontSizeSp = baseFontSize.value.sp
     
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -119,7 +120,7 @@ private fun TopBar(
                 // Time
                 Text(
                     text = time,
-                    fontSize = (fontSize.value * 1.75f).sp,
+                    fontSize = (baseFontSizeSp.value * 1.75f).sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -132,12 +133,12 @@ private fun TopBar(
                     ) {
                         Text(
                             text = "${it.temperature}°",
-                            fontSize = (fontSize.value * 1.25f).sp,
+                            fontSize = (baseFontSizeSp.value * 1.25f).sp,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = it.condition,
-                            fontSize = fontSize
+                            fontSize = baseFontSizeSp
                         )
                     }
                 }
@@ -325,7 +326,7 @@ private fun BackgroundAppsBar(
 ) {
     val padding = screenDims.scaledSize(10.dp)
     val spacing = screenDims.scaledSize(12.dp)
-    val fontSize = with(screenDims) { scaledSize(11.sp.value.dp) }
+    val fontSize = with(screenDims) { scaledSize(11.sp.value.dp).value.sp }
     
     Surface(
         modifier = Modifier.fillMaxWidth(),

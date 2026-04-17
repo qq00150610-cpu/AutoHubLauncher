@@ -16,17 +16,19 @@ import kotlin.coroutines.resumeWithException
 
 /**
  * 微信登录服务
+ * 注意：微信SDK集成需要配置微信开放平台AppID
+ * 当前为简化实现，仅提供框架代码
  */
 @Singleton
 class WeChatLoginService @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     companion object {
-        // 替换为实际的微信AppID
+        // TODO: 替换为实际的微信开放平台AppID
         private const val WECHAT_APP_ID = "wx1234567890abcdef"
-        private const val WECHAT_APP_SECRET = "your_app_secret"
     }
 
+    // IWXAPI 实例
     private val wxApi: IWXAPI by lazy {
         WXAPIFactory.createWXAPI(context, WECHAT_APP_ID, true).apply {
             registerApp(WECHAT_APP_ID)
@@ -48,45 +50,32 @@ class WeChatLoginService @Inject constructor(
             throw WeChatNotInstalledException()
         }
 
-        val request = SendAuth.Req()
-        request.scope = "snsapi_userinfo"
-        request.state = generateState()
-        wxApi.sendReq(request, activity)
+        val request = SendAuth.Req().apply {
+            scope = "snsapi_userinfo"
+            state = generateState()
+        }
+        wxApi.sendReq(request)
     }
 
     /**
      * 处理微信登录回调
      */
-    suspend fun handleLoginResult(code: Int, resp: SendAuth.Resp?): Result<WeChatLoginResponse> {
+    suspend fun handleLoginResult(resp: SendAuth.Resp): Result<WeChatLoginResponse> {
         return suspendCancellableCoroutine { continuation ->
-            if (resp == null) {
-                continuation.resumeWithException(Exception("微信登录响应为空"))
-                return@suspendCancellableCoroutine
-            }
-
-            when (code) {
-                Activity.RESULT_OK -> {
-                    if (resp.errCode == SendAuth.Req.ErrCode.ERR_OK) {
-                        val response = WeChatLoginResponse(
-                            openId = resp.openId ?: "",
-                            unionId = resp.unionId,
-                            accessToken = resp.code ?: ""
-                        )
-                        continuation.resume(Result.success(response))
-                    } else {
-                        val errorMsg = when (resp.errCode) {
-                            SendAuth.Req.ErrCode.ERR_AUTH_DENIED -> "用户拒绝授权"
-                            SendAuth.Req.ErrCode.ERR_USER_CANCEL -> "用户取消"
-                            SendAuth.Req.ErrCode.ERR_BAN -> "账号被封禁"
-                            SendAuth.Req.ErrCode.ERR_COMM -> "网络错误"
-                            else -> "未知错误: ${resp.errStr}"
-                        }
-                        continuation.resumeWithException(WeChatLoginException(errorMsg))
-                    }
+            if (resp.errCode == 0) { // ErrCode.ERR_OK
+                val response = WeChatLoginResponse(
+                    openId = resp.openId ?: "",
+                    unionId = null,
+                    accessToken = resp.code ?: ""
+                )
+                continuation.resume(Result.success(response))
+            } else {
+                val errorMsg = when (resp.errCode) {
+                    -1 -> "微信签名配置错误"
+                    -2 -> "用户取消"
+                    else -> "微信登录失败: ${resp.errStr}"
                 }
-                else -> {
-                    continuation.resumeWithException(WeChatLoginException("微信登录失败"))
-                }
+                continuation.resumeWithException(WeChatLoginException(errorMsg))
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.autohub.launcher.ui.apps
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -165,12 +166,9 @@ private fun SortOptionsRow(
             onClick = { onSortChanged(AppSortBy.NAME) },
             label = { Text("名称") },
             border = if (currentSort == AppSortBy.NAME) {
-                androidx.compose.foundation.BorderStroke(
-                    2.dp, 
-                    MaterialTheme.colorScheme.primary
-                )
+                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
             } else {
-                AssistChipDefaults.assistChipBorder
+                null
             }
         )
 
@@ -178,12 +176,9 @@ private fun SortOptionsRow(
             onClick = { onSortChanged(AppSortBy.SIZE) },
             label = { Text("大小") },
             border = if (currentSort == AppSortBy.SIZE) {
-                androidx.compose.foundation.BorderStroke(
-                    2.dp, 
-                    MaterialTheme.colorScheme.primary
-                )
+                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
             } else {
-                AssistChipDefaults.assistChipBorder
+                null
             }
         )
 
@@ -191,12 +186,9 @@ private fun SortOptionsRow(
             onClick = { onSortChanged(AppSortBy.INSTALL_TIME) },
             label = { Text("安装时间") },
             border = if (currentSort == AppSortBy.INSTALL_TIME) {
-                androidx.compose.foundation.BorderStroke(
-                    2.dp, 
-                    MaterialTheme.colorScheme.primary
-                )
+                BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
             } else {
-                AssistChipDefaults.assistChipBorder
+                null
             }
         )
     }

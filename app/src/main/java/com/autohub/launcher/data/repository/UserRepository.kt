@@ -14,8 +14,8 @@ import com.autohub.launcher.data.api.AuthApi
 import com.autohub.launcher.data.api.RefreshTokenRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -84,7 +84,8 @@ class UserRepository @Inject constructor(
      */
     suspend fun loginWithPhone(phone: String, code: String): Result<LoginResponse> {
         return try {
-            val response = authApi.loginWithPhone(phone, code)
+            val request = PhoneLoginRequest(phone = phone, code = code)
+            val response = authApi.loginWithPhone(request)
             saveUserInfo(response)
             Result.success(response)
         } catch (e: Exception) {
@@ -97,7 +98,8 @@ class UserRepository @Inject constructor(
      */
     suspend fun loginWithWeChat(authCode: String): Result<LoginResponse> {
         return try {
-            val response = authApi.loginWithWeChat(authCode)
+            val request = WeChatLoginRequest(code = authCode)
+            val response = authApi.loginWithWeChat(request)
             saveUserInfo(response)
             Result.success(response)
         } catch (e: Exception) {
