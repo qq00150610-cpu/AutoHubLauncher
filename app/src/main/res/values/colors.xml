@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- AutoHub Brand Colors -->
+    <color name="primary_blue">#2196F3</color>
+    <color name="primary_blue_dark">#1976D2</color>
+    <color name="primary_blue_light">#BBDEFB</color>
+
+    <color name="secondary_pink">#E91E63</color>
+    <color name="secondary_pink_dark">#C2185B</color>
+    <color name="secondary_pink_light">#F8BBD9</color>
+
+    <color name="success_green">#4CAF50</color>
+    <color name="warning_orange">#FF9800</color>
+    <color name="error_red">#F44336</color>
+
+    <!-- Navigation Color -->
+    <color name="nav_icon_active">#2196F3</color>
+    <color name="nav_icon_inactive">#9E9E9E</color>
+
+    <!-- Background Colors -->
+    <color name="background_light">#FAFAFA</color>
+    <color name="background_dark">#121212</color>
+
+    <!-- Surface Colors -->
+    <color name="surface_light">#FFFFFF</color>
+    <color name="surface_dark">#1E1E1E</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#BDBDBD</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Floating Ball -->
+    <color name="floating_ball_background">#E91E63</color>
+    <color name="floating_ball_menu_background">#FFFFFF</color>
+
+    <!-- Card Colors -->
+    <color name="card_background_light">#FFFFFF</color>
+    <color name="card_background_dark">#2C2C2C</color>
+
+    <!-- Weather Colors -->
+    <color name="weather_sunny">#FFC107</color>
+    <color name="weather_cloudy">#9E9E9E</color>
+    <color name="weather_rainy">#2196F3</color>
+</resources>

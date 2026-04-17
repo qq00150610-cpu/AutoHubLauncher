@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common dimensions -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xxL">48dp</dimen>
+
+    <!-- Icon sizes -->
+    <dimen name="icon_size_xs">16dp</dimen>
+    <dimen name="icon_size_sm">24dp</dimen>
+    <dimen name="icon_size_md">32dp</dimen>
+    <dimen name="icon_size_lg">48dp</dimen>
+    <dimen name="icon_size_xl">64dp</dimen>
+    <dimen name="icon_size_xxL">96dp</dimen>
+
+    <!-- App icon sizes -->
+    <dimen name="app_icon_size_small">48dp</dimen>
+    <dimen name="app_icon_size_medium">64dp</dimen>
+    <dimen name="app_icon_size_large">96dp</dimen>
+
+    <!-- Card sizes -->
+    <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+
+    <!-- Floating ball -->
+    <dimen name="floating_ball_size">56dp</dimen>
+    <dimen name="floating_ball_hit_size">72dp</dimen>
+
+    <!-- Status bar -->
+    <dimen name="status_bar_height">48dp</dimen>
+
+    <!-- Navigation bar -->
+    <dimen name="bottom_nav_height">80dp</dimen>
+    <dimen name="bottom_nav_icon_size">32dp</dimen>
+
+    <!-- Text sizes -->
+    <dimen name="text_size_xs">10sp</dimen>
+    <dimen name="text_size_sm">12sp</dimen>
+    <dimen name="text_size_md">14sp</dimen>
+    <dimen name="text_size_lg">16sp</dimen>
+    <dimen name="text_size_xl">18sp</dimen>
+    <dimen name="text_size_xxL">24sp</dimen>
+    <dimen name="text_size_xxxL">32sp</dimen>
+
+    <!-- Elevation -->
+    <dimen name="elevation_sm">2dp</dimen>
+    <dimen name="elevation_md">4dp</dimen>
+    <dimen name="elevation_lg">8dp</dimen>
+    <dimen name="elevation_xl">12dp</dimen>
+</resources>

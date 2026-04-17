@@ -1,0 +1,70 @@
+package com.autohub.launcher
+
+import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class AutoHubApplication : Application() {
+
+    companion object {
+        const val NOTIFICATION_CHANNEL_ID = "autohub_notification_channel"
+        const val NOTIFICATION_CHANNEL_ID_MUSIC = "autohub_music_channel"
+        const val NOTIFICATION_CHANNEL_ID_NAV = "autohub_nav_channel"
+        const val NOTIFICATION_CHANNEL_ID_SERVICE = "autohub_service_channel"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannels()
+    }
+
+    private fun createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager = getSystemService(NotificationManager::class.java)
+
+            // General notification channel
+            val channelGeneral = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                "AutoHub Notifications",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "General notifications from AutoHub"
+            }
+
+            // Music notification channel
+            val channelMusic = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID_MUSIC,
+                "Music Control",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Music playback controls"
+            }
+
+            // Navigation notification channel
+            val channelNav = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID_NAV,
+                "Navigation",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Navigation instructions"
+            }
+
+            // Service notification channel
+            val channelService = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID_SERVICE,
+                "Foreground Services",
+                NotificationManager.IMPORTANCE_MIN
+            ).apply {
+                description = "Background services"
+            }
+
+            notificationManager.createNotificationChannel(channelGeneral)
+            notificationManager.createNotificationChannel(channelMusic)
+            notificationManager.createNotificationChannel(channelNav)
+            notificationManager.createNotificationChannel(channelService)
+        }
+    }
+}

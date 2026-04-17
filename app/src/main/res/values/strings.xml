@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">智驾桌面</string>
+    <string name="home">首页</string>
+    <string name="navigation">导航</string>
+    <string name="music">音乐</string>
+    <string name="video">视频</string>
+    <string name="settings">设置</string>
+
+    <!-- Status Bar -->
+    <string name="status_time">%1$s:%2$s</string>
+    <string name="weather_temperature">%1$d°%2$s</string>
+
+    <!-- Floating Ball -->
+    <string name="floating_ball">悬浮球</string>
+    <string name="floating_ball_back">返回</string>
+    <string name="floating_ball_home">桌面</string>
+    <string name="floating_ball_music">音乐</string>
+    <string name="floating_ball_recent">最近应用</string>
+
+    <!-- Quick Actions -->
+    <string name="quick_action_home">回家</string>
+    <string name="quick_action_work">公司</string>
+
+    <!-- Smart Cards -->
+    <string name="card_weather">天气</string>
+    <string name="card_schedule">日程</string>
+    <string name="card_vehicle">车辆信息</string>
+
+    <!-- Permissions -->
+    <string name="permission_overlay_title">悬浮窗权限</string>
+    <string name="permission_overlay_description">需要悬浮窗权限以显示悬浮球和画中画功能</string>
+    <string name="permission_grant">授权</string>
+    <string name="permission_cancel">取消</string>
+
+    <!-- Error -->
+    <string name="error_app_not_found">应用未找到</string>
+    <string name="error_permission_denied">权限被拒绝</string>
+    <string name="error_unknown">未知错误</string>
+
+    <!-- Navigation -->
+    <string name="nav_start">开始导航</string>
+    <string name="nav_search_destination">搜索目的地</string>
+    <string name="nav_current_location">当前位置</string>
+
+    <!-- Music -->
+    <string name="music_playing">正在播放</string>
+    <string name="music_paused">已暂停</string>
+    <string name="music_next">下一首</string>
+    <string name="music_previous">上一首</string>
+
+    <!-- Video -->
+    <string name="video_warning_title">安全提示</string>
+    <string name="video_warning_message">检测到车辆正在行驶,视频已暂停播放。为确保行车安全,行驶过程中禁止观看视频。</string>
+    <string name="video_warning_audio_only">仅播放音频</string>
+    <string name="video_warning_understood">我知道了</string>
+    <string name="video_warning_disable">关闭限制(需密码)</string>
+
+    <!-- Settings -->
+    <string name="settings_general">通用设置</string>
+    <string name="settings_theme">主题</string>
+    <string name="settings_wallpaper">壁纸</string>
+    <string name="settings_floating_ball">悬浮球设置</string>
+    <string name="settings_floating_ball_enabled">启用悬浮球</string>
+    <string name="settings_floating_ball_auto_hide">自动隐藏</string>
+    <string name="settings_car_model">车型选择</string>
+    <string name="settings_about">关于</string>
+
+    <!-- Factory Mode -->
+    <string name="factory_mode_title">工厂模式</string>
+    <string name="factory_mode_warning">仅限技术人员使用</string>
+    <string name="factory_mode_password">请输入工厂模式密码</string>
+    <string name="factory_mode_enter">确认进入</string>
+</resources>
