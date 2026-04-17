@@ -3,8 +3,7 @@ package com.autohub.launcher.ui.wxapi
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.viewModels
 import com.autohub.launcher.ui.auth.LoginViewModel
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
@@ -18,20 +17,15 @@ import dagger.hilt.android.AndroidEntryPoint
 class WXEntryActivity : ComponentActivity(), IWXAPIEventHandler {
 
     private lateinit var api: com.tencent.mm.opensdk.openapi.IWXAPI
-    private lateinit var loginViewModel: LoginViewModel
+    
+    private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            // This is a callback activity, no UI needed
-        }
 
         // 初始化微信API
         api = WXAPIFactory.createWXAPI(this, "wx1234567890abcdef", false)
         api.handleIntent(intent, this)
-
-        // 获取ViewModel实例
-        loginViewModel = viewModel()
     }
 
     override fun onReq(baseReq: com.tencent.mm.opensdk.modelbase.BaseReq) {
