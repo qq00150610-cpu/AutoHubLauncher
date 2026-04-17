@@ -1,5 +1,6 @@
 package com.autohub.launcher.service
 
+import android.content.Context
 import com.autohub.launcher.data.adapter.CarAdapter
 import com.autohub.launcher.domain.model.CarInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -15,7 +16,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class CarControlService @Inject constructor(
-    @ApplicationContext private val context: android.content.Context,
+    @ApplicationContext private val context: Context,
     private val carAdapter: CarAdapter
 ) {
     private val _carInfo = MutableStateFlow(CarInfo())
