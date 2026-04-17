@@ -30,11 +30,10 @@ fun CarModelSelectionScreen(
     onBack: () -> Unit = {},
     onModelSelected: (String, String) -> Unit = { _, _ -> }
 ) {
-    val selectedManufacturer by viewModel.selectedManufacturer.collectAsState()
-    val selectedModel by viewModel.selectedCarModel.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val carAdapters = viewModel.availableCarAdapters
 
-    var expandedManufacturer by remember { mutableStateOf(selectedManufacturer) }
+    var expandedManufacturer by remember { mutableStateOf(uiState.selectedManufacturer) }
 
     Scaffold(
         topBar = {
@@ -78,7 +77,7 @@ fun CarModelSelectionScreen(
                 ManufacturerItem(
                     manufacturer = adapter.manufacturer,
                     supportedModels = adapter.supportedModels,
-                    isSelected = adapter.manufacturer == selectedManufacturer,
+                    isSelected = adapter.manufacturer == uiState.selectedManufacturer,
                     onClick = {
                         expandedManufacturer = adapter.manufacturer
                     }
@@ -110,7 +109,7 @@ fun CarModelSelectionScreen(
                     val model = selectedAdapter.supportedModels[index]
                     CarModelItem(
                         model = model,
-                        isSelected = model == selectedModel,
+                        isSelected = model == uiState.selectedCarModel,
                         onClick = {
                             viewModel.selectCarModel(selectedAdapter.manufacturer, model)
                             onModelSelected(selectedAdapter.manufacturer, model)
