@@ -5,6 +5,13 @@ plugins {
     id 'dagger.hilt.android.plugin'
 }
 
+// Generate signing config for debug builds
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.autohub.launcher'
     compileSdk 34
@@ -22,10 +29,42 @@ android {
         }
     }
 
-    buildTypes {
+    signingConfigs {
+        debug {
+            // Use default debug keystore
+            storeFile file("${System.properties['user.home']}/.android/debug.keystore")
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
         release {
+            // Check if keystore properties exist
+            if (keystorePropertiesFile.exists()) {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            } else {
+                // Fallback to debug keystore for CI builds
+                storeFile file("${System.properties['user.home']}/.android/debug.keystore")
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
             minifyEnabled false
+        }
+        release {
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -99,14 +138,14 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
-    // Coil (图片加载)
-    implementation 'io.coil-kt:coil-compose:2.4.0'
+    // Gson
+    implementation 'com.google.code.gson:gson:2.10.1'
 
-    // 微信SDK
-    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:6.8.0'
+    // Coil (image loading)
+    implementation 'io.coil-kt:coil-compose:2.5.0'
 
-    // Kotlinx Serialization
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
+    // DataStore
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
@@ -116,4 +155,9 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+}
+
+// Allow references to generated code
+kapt {
+    correctErrorTypes true
 }

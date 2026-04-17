@@ -22,3 +22,13 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+// Force consistent versions across all subprojects
+subprojects {
+    configurations.all {
+        resolutionStrategy {
+            force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.0'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0'
+        }
+    }
+}
