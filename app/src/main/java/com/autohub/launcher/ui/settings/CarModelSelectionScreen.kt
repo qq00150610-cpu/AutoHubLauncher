@@ -97,20 +97,25 @@ fun CarModelSelectionScreen(
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
+            }
 
-                val selectedAdapter = carAdapters.value.find { it.manufacturer == expandedManufacturer }
-                if (selectedAdapter != null) {
-                    items(selectedAdapter.supportedModels.size) { index ->
-                        val model = selectedAdapter.supportedModels[index]
-                        CarModelItem(
-                            model = model,
-                            isSelected = model == selectedModel,
-                            onClick = {
-                                viewModel.selectCarModel(selectedAdapter.manufacturer, model)
-                                onModelSelected(selectedAdapter.manufacturer, model)
-                            }
-                        )
-                    }
+            val selectedAdapter = if (expandedManufacturer.isNotEmpty()) {
+                carAdapters.value.find { adapter -> adapter.manufacturer == expandedManufacturer }
+            } else {
+                null
+            }
+            
+            if (selectedAdapter != null) {
+                items(selectedAdapter.supportedModels.size) { index ->
+                    val model = selectedAdapter.supportedModels[index]
+                    CarModelItem(
+                        model = model,
+                        isSelected = model == selectedModel,
+                        onClick = {
+                            viewModel.selectCarModel(selectedAdapter.manufacturer, model)
+                            onModelSelected(selectedAdapter.manufacturer, model)
+                        }
+                    )
                 }
             }
 
