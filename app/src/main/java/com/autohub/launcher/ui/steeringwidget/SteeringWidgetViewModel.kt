@@ -84,7 +84,8 @@ class SteeringWidgetViewModel @Inject constructor(
     fun onMappingSelected(action: com.autohub.launcher.domain.model.KeyAction) {
         val currentProfile = _uiState.value.currentProfile ?: return
         val currentMappings = currentProfile.mappings.toMutableMap()
-        val editingKey = currentMappings[_uiState.value.editingKeyCode]
+        val editingKeyCode = _uiState.value.editingKeyCode ?: return
+        val editingKey = currentMappings[editingKeyCode]
 
         if (editingKey != null) {
             val updatedMapping = when (_uiState.value.selectedPressType) {
@@ -93,7 +94,7 @@ class SteeringWidgetViewModel @Inject constructor(
                 PressType.DOUBLE_CLICK -> editingKey.copy(doubleClickAction = action)
             }
 
-            currentMappings[_uiState.value.editingKeyCode] = updatedMapping
+            currentMappings[editingKeyCode] = updatedMapping
 
             val updatedProfile = currentProfile.copy(mappings = currentMappings)
             _uiState.value = _uiState.value.copy(
