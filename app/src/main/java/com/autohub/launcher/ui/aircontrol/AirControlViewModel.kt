@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.autohub.launcher.data.local.SettingsRepository
 import com.autohub.launcher.service.CarControlService
 import com.autohub.launcher.service.TemperatureZone
-import com.autohub.launcher.service.AirMode
+import com.autohub.launcher.domain.model.AirMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

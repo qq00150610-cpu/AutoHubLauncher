@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.autohub.launcher.service.AirMode
+import com.autohub.launcher.domain.model.AirMode
 
 @Composable
 fun AirControlScreen(
