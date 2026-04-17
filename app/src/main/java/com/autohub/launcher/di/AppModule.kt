@@ -1,10 +1,11 @@
 package com.autohub.launcher.di
 
 import android.content.Context
-import com.autohub.launcher.service.CarAdapter
-import com.autohub.launcher.service.BYDCarAdapter
-import com.autohub.launcher.service.GeelyCarAdapter
-import com.autohub.launcher.service.GenericCarAdapter
+import com.autohub.launcher.data.adapter.CarAdapter
+import com.autohub.launcher.data.adapter.BYDCarAdapter
+import com.autohub.launcher.data.adapter.GeelyCarAdapter
+import com.autohub.launcher.data.adapter.DongfengAdapter
+import com.autohub.launcher.data.adapter.GenericCarAdapter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,16 +25,40 @@ object AppModule {
         val carModel = detectCarModel(context)
 
         return when (carModel) {
-            "BYD" -> BYDCarAdapter()
-            "GEELY" -> GeelyCarAdapter()
-            else -> GenericCarAdapter()
+            "BYD" -> BYDCarAdapter(context)
+            "GEELY" -> GeelyCarAdapter(context)
+            "DONGFENG" -> DongfengAdapter(context)
+            else -> GenericCarAdapter(context)
         }
     }
 
     private fun detectCarModel(context: Context): String {
-        // TODO: Implement car model detection
-        // Check system properties, build info, etc.
-        // For now, return generic
-        return "GENERIC"
+        // Check for specific manufacturer packages
+        val packages = context.packageManager.getInstalledApplications(0)
+        
+        // Check for Dongfeng Aeolus launcher
+        if (packages.any { it.packageName.contains("aeolus", ignoreCase = true) }) {
+            return "DONGFENG"
+        }
+        
+        // Check for BYD launcher
+        if (packages.any { it.packageName.contains("byd", ignoreCase = true) }) {
+            return "BYD"
+        }
+        
+        // Check for Geely launcher
+        if (packages.any { it.packageName.contains("geely", ignoreCase = true) }) {
+            return "GEELY"
+        }
+        
+        // Check build manufacturer
+        val buildManufacturer = android.os.Build.MANUFACTURER
+        return when {
+            buildManufacturer.contains("BYD", ignoreCase = true) -> "BYD"
+            buildManufacturer.contains("Geely", ignoreCase = true) -> "GEELY"
+            buildManufacturer.contains("Dongfeng", ignoreCase = true) ||
+            buildManufacturer.contains("Aeolus", ignoreCase = true) -> "DONGFENG"
+            else -> "GENERIC"
+        }
     }
 }

@@ -239,8 +239,9 @@ APK文件位置:
 ## 车型适配
 
 ### 已适配车型
-- 比亚迪 DiLink系统(秦PLUS、汉EV、宋PLUS等)
-- 吉利 GKUI系统(博越、星越L等)
+- 比亚迪 DiLink系统(秦PLUS、汉EV、宋PLUS、唐EV、元PLUS、海豚、海豹等)
+- 吉利 GKUI系统(博越、博越COOL、博越X、星越、星越L、缤瑞、帝豪、嘉际、远景、豪越等)
+- 东风风神系统(奕炫、奕炫MAX、奕炫GS、AX7、AX7 PRO、GS MAX、皓极等)
 - 长安系统(CS75PLUS、UNI-T等)
 
 ### 适配功能
