@@ -12,6 +12,8 @@ import com.autohub.launcher.data.model.User
 import com.autohub.launcher.data.model.WeChatLoginResponse
 import com.autohub.launcher.data.api.AuthApi
 import com.autohub.launcher.data.api.RefreshTokenRequest
+import com.autohub.launcher.data.api.PhoneLoginRequest
+import com.autohub.launcher.data.api.WeChatLoginRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -122,7 +124,7 @@ class UserRepository @Inject constructor(
     suspend fun refreshToken(): Result<String> {
         return try {
             val refreshToken = context.userDataStore.data.map { it[Keys.REFRESH_TOKEN] }
-                .firstOrNull() ?: return Result.failure(Exception("No refresh token"))
+                .first() ?: return Result.failure(Exception("No refresh token"))
 
             val response = authApi.refreshToken(RefreshTokenRequest(refreshToken))
             context.userDataStore.edit { prefs ->
