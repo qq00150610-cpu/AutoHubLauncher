@@ -1,39 +1,40 @@
 package com.autohub.launcher.service
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
-import android.os.Build
-import android.os.IBinder
-import androidx.core.app.NotificationCompat
-import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@AndroidEntryPoint
-class MusicControlService : Service() {
-
-    private lateinit var mediaSessionManager: MediaSessionManager
+/**
+ * 音乐控制服务
+ * 提供媒体播放控制功能
+ */
+@Singleton
+class MusicControlService @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    private var mediaSessionManager: MediaSessionManager? = null
     private var mediaController: MediaController? = null
 
-    override fun onCreate() {
-        super.onCreate()
-        mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-        setupMediaController()
+    init {
+        try {
+            mediaSessionManager = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+            setupMediaController()
+        } catch (e: Exception) {
+            // Handle initialization error
+        }
     }
 
     private fun setupMediaController() {
         try {
-            val activeSessions = mediaSessionManager.getActiveSessions(
-                ComponentName(this, this.javaClass)
+            val activeSessions = mediaSessionManager?.getActiveSessions(
+                ComponentName(context, MusicControlService::class.java)
             )
-            if (activeSessions.isNotEmpty()) {
-                mediaController = MediaController(this, activeSessions[0].sessionToken)
+            if (!activeSessions.isNullOrEmpty()) {
+                mediaController = MediaController(context, activeSessions[0].sessionToken)
             }
         } catch (e: SecurityException) {
             // Notification listener permission not granted
@@ -70,6 +71,4 @@ class MusicControlService : Service() {
             // Handle playback control error
         }
     }
-
-    override fun onBind(intent: Intent?): IBinder? = null
 }

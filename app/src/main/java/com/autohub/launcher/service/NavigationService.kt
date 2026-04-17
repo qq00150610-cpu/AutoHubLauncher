@@ -1,22 +1,36 @@
 package com.autohub.launcher.service
 
-import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.IBinder
-import dagger.hilt.android.AndroidEntryPoint
+import android.net.Uri
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
-@AndroidEntryPoint
-class NavigationService : Service() {
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
-
-    fun startNavigation(destination: String) {
-        // TODO: Implement navigation integration
-        // Support for: 高德地图, 百度地图, 腾讯地图
-        // Use Intent to launch navigation apps
+/**
+ * 导航服务
+ * 提供导航启动和状态管理功能
+ */
+@Singleton
+class NavigationService @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    fun startNavigation(destination: String, latitude: Double? = null, longitude: Double? = null) {
+        // Try to launch navigation apps
+        val intent = try {
+            // Try Amap (高德)
+            if (latitude != null && longitude != null) {
+                Intent(Intent.ACTION_VIEW, Uri.parse("androidamap://navi?sourceApplication=AutoHub&lat=$latitude&lon=$longitude"))
+            } else {
+                Intent(Intent.ACTION_VIEW, Uri.parse("androidamap://navi?sourceApplication=AutoHub&poiname=$destination"))
+            }
+        } catch (e: Exception) {
+            // Fallback to generic geo intent
+            Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=$destination"))
+        }
+        
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        context.startActivity(intent)
     }
 
     fun getNavigationStatus(): NavigationStatus {
@@ -33,6 +47,6 @@ class NavigationService : Service() {
 data class NavigationStatus(
     val isActive: Boolean,
     val destination: String,
-    val distance: Int, // in meters
-    val eta: Int // in seconds
+    val distance: Int,  // meters
+    val eta: Int        // seconds
 )
