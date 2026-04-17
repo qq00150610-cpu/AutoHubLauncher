@@ -1,4 +1,4 @@
-name: Build Release APK
+name: Build APK
 
 on:
   push:
@@ -21,16 +21,33 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
-    - name: Create debug keystore for signing
+    - name: Create release keystore
       run: |
         mkdir -p ~/.android
-        keytool -genkeypair -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+        keytool -genkeypair -v \
+          -keystore ~/.android/release.keystore \
+          -storepass autohub2024 \
+          -alias autohub \
+          -keypass autohub2024 \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -dname "CN=AutoHub, OU=AutoHub, O=AutoHub, L=Beijing, ST=Beijing, C=CN"
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+    
     - name: Build Release APK
       run: ./gradlew assembleRelease
+    
+    - name: Upload Debug APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
     
     - name: Upload Release APK
       uses: actions/upload-artifact@v4

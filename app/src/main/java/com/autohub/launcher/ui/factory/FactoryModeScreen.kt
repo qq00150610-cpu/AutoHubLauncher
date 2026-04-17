@@ -185,14 +185,14 @@ private fun FactoryModeMainScreen(
             }
 
             if (uiState.systemInfo != null) {
-                val systemInfo = uiState.systemInfo
+                val systemInfo = uiState.systemInfo!!
                 item {
                     SystemInfoCard(systemInfo)
                 }
             }
 
             if (uiState.deviceInfo != null) {
-                val deviceInfo = uiState.deviceInfo
+                val deviceInfo = uiState.deviceInfo!!
                 item {
                     DeviceInfoCard(deviceInfo)
                 }

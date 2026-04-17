@@ -286,7 +286,7 @@ private fun AppGridItem(
 ) {
     val iconSize = screenDims.scaledSize(48.dp)
     val spacing = screenDims.scaledSize(6.dp)
-    val fontSize = with(screenDims) { scaledSize(11.sp.value.dp) }
+    val fontSize = with(screenDims) { scaledSize(11.sp.value.dp).value.sp }
     
     Column(
         modifier = Modifier
@@ -349,7 +349,7 @@ private fun SectionTitle(
     title: String,
     screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
 ) {
-    val fontSize = with(screenDims) { scaledSize(16.sp.value.dp) }
+    val fontSize = with(screenDims) { scaledSize(16.sp.value.dp).value.sp }
     val padding = screenDims.scaledSize(6.dp)
     
     Text(
@@ -365,7 +365,7 @@ private fun PlaceholderContent(
     title: String,
     screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
 ) {
-    val fontSize = with(screenDims) { scaledSize(20.sp.value.dp) }
+    val fontSize = with(screenDims) { scaledSize(20.sp.value.dp).value.sp }
     
     Box(
         modifier = Modifier.fillMaxSize(),
