@@ -13,10 +13,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -92,16 +96,16 @@ fun SteeringWidgetScreen(
     }
 
     // Export/Import Result Messages
-    if (uiState.exportResult != null) {
+    uiState.exportResult?.let { result ->
         ResultMessageDialog(
-            message = uiState.exportResult,
+            message = result,
             onDismiss = { viewModel.dismissMessages() }
         )
     }
 
-    if (uiState.importResult != null) {
+    uiState.importResult?.let { result ->
         ResultMessageDialog(
-            message = uiState.importResult,
+            message = result,
             onDismiss = { viewModel.dismissMessages() }
         )
     }
@@ -522,7 +526,7 @@ private fun CreateProfileDialog(
     onDismiss: () -> Unit,
     onCreate: (String) -> Unit
 ) {
-    var profileName by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var profileName by remember { mutableStateOf("") }
 
     Dialog(
         onDismissRequest = onDismiss,
