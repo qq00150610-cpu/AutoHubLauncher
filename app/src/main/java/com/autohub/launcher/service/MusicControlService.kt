@@ -8,15 +8,11 @@ import android.app.Service
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.autohub.launcher.AutoHubApplication
-import com.autohub.launcher.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -45,15 +41,27 @@ class MusicControlService : Service() {
     }
 
     fun playPause() {
-        mediaController?.transportControls?.playPause()
+        try {
+            mediaController?.transportControls?.playPause()
+        } catch (e: Exception) {
+            // Handle playback control error
+        }
     }
 
     fun next() {
-        mediaController?.transportControls?.skipToNext()
+        try {
+            mediaController?.transportControls?.skipToNext()
+        } catch (e: Exception) {
+            // Handle playback control error
+        }
     }
 
     fun previous() {
-        mediaController?.transportControls?.skipToPrevious()
+        try {
+            mediaController?.transportControls?.skipToPrevious()
+        } catch (e: Exception) {
+            // Handle playback control error
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder? {

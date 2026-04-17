@@ -22,7 +22,12 @@ class GetBackgroundAppsUseCase @Inject constructor(
                 task.topActivity?.let { activityInfo ->
                     AppInfo(
                         packageName = activityInfo.packageName,
-                        name = activityInfo.loadLabel(context.packageManager).toString()
+                        name = try {
+                            activityInfo.applicationInfo?.loadLabel(context.packageManager)?.toString() 
+                                ?: activityInfo.packageName
+                        } catch (e: Exception) {
+                            activityInfo.packageName
+                        }
                     )
                 }
             }

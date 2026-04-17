@@ -37,7 +37,7 @@ class FileManager @Inject constructor(
         loadFiles()
     }
 
-    private fun getDefaultPath(): String {
+    fun getDefaultPath(): String {
         return context.getExternalFilesDir(null)?.absolutePath ?: "/sdcard"
     }
 

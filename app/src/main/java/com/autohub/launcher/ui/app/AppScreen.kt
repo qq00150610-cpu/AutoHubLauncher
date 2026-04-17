@@ -17,7 +17,7 @@ import com.autohub.launcher.ui.profile.ProfileScreen
 fun AppScreen(
     appViewModel: AppViewModel = viewModel()
 ) {
-    val isLoggedIn by appViewModel.isLoggedIn.collectAsState()
+    val isLoggedIn by appViewModel.isLoggedIn.collectAsState(initial = false)
     var showLogin by remember { mutableStateOf(!isLoggedIn) }
     var showProfile by remember { mutableStateOf(false) }
     val mainViewModel: MainViewModel = hiltViewModel()

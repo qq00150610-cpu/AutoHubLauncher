@@ -3,8 +3,8 @@ package com.autohub.launcher.ui.app
 import androidx.lifecycle.ViewModel
 import com.autohub.launcher.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
@@ -18,5 +18,5 @@ class AppViewModel @Inject constructor(
     /**
      * 用户登录状态
      */
-    val isLoggedIn: StateFlow<Boolean> = userRepository.isLoggedIn.asStateFlow()
+    val isLoggedIn: Flow<Boolean> = userRepository.isLoggedIn
 }

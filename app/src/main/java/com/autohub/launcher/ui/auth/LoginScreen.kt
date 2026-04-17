@@ -47,19 +47,21 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var agreementChecked by remember { mutableStateOf(false) }
 
-    val loginState by viewModel.loginState.collectAsState()
-    val codeState by viewModel.codeState.collectAsState()
-    val countdown by viewModel.countdown.collectAsState()
+    val loginState by viewModel.loginState.collectAsState(initial = null)
+    val codeState by viewModel.codeState.collectAsState(initial = null)
+    val countdown by viewModel.countdown.collectAsState(initial = 60)
 
     LaunchedEffect(loginState) {
-        if (loginState.isSuccess) {
+        val state = loginState
+        if (state is UiState.Success) {
             Toast.makeText(context, "登录成功", Toast.LENGTH_SHORT).show()
             onLoginSuccess()
         }
     }
 
     LaunchedEffect(codeState) {
-        if (codeState.isSuccess) {
+        val state = codeState
+        if (state is UiState.Success) {
             Toast.makeText(context, "验证码已发送", Toast.LENGTH_SHORT).show()
         }
     }
@@ -215,7 +217,7 @@ fun LoginScreen(
                             Toast.makeText(context, "请先同意用户协议", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    enabled = loginState.isLoading,
+                    enabled = loginState !is UiState.Loading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -224,7 +226,7 @@ fun LoginScreen(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    if (loginState.isLoading) {
+                    if (loginState is UiState.Loading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = MaterialTheme.colorScheme.onPrimary

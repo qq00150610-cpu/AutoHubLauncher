@@ -190,10 +190,7 @@ private fun FileItem(
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp)
-            .clickable(
-                onClick = onFileClick,
-                onLongClick = onFileLongClick
-            ),
+            .clickable(onClick = onFileClick),
         shape = RoundedCornerShape(12.dp),
         color = if (isSelected) {
             MaterialTheme.colorScheme.primaryContainer

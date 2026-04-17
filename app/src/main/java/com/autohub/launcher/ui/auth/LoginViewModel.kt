@@ -121,11 +121,11 @@ class LoginViewModel @Inject constructor(
     /**
      * 处理微信登录回调
      */
-    fun handleWeChatLoginResult(code: Int, resp: SendAuth.Resp?) {
+    fun handleWeChatLoginResult(resp: SendAuth.Resp) {
         viewModelScope.launch {
             _loginState.value = UiState.Loading
             try {
-                val result = weChatLoginService.handleLoginResult(code, resp)
+                val result = weChatLoginService.handleLoginResult(resp)
                 if (result.isSuccess) {
                     val weChatResp = result.getOrNull()!!
                     val loginResp = userRepository.loginWithWeChat(weChatResp.accessToken)

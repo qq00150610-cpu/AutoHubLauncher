@@ -40,7 +40,7 @@ class ProfileViewModel @Inject constructor(
     fun updateUserInfo(nickname: String, avatar: String) {
         viewModelScope.launch {
             try {
-                val user = userRepository.currentUser.firstOrNull() ?: return@launch
+                val user = userRepository.currentUser.first() ?: return@launch
                 val updatedUser = user.copy(
                     nickname = nickname,
                     avatar = avatar
