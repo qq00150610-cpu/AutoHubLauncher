@@ -63,24 +63,6 @@
             android:exported="false"
             android:enabled="true" />
 
-        <!-- Music Control Service -->
-        <service
-            android:name=".service.MusicControlService"
-            android:exported="false"
-            android:enabled="true" />
-
-        <!-- Navigation Service -->
-        <service
-            android:name=".service.NavigationService"
-            android:exported="false"
-            android:enabled="true" />
-
-        <!-- Car Control Service -->
-        <service
-            android:name=".service.CarControlService"
-            android:exported="false"
-            android:enabled="true" />
-
         <!-- Boot Receiver -->
         <receiver
             android:name=".receiver.BootReceiver"
