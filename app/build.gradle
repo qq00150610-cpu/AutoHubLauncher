@@ -31,26 +31,16 @@ android {
 
     signingConfigs {
         debug {
-            // Use default debug keystore
             storeFile file("${System.properties['user.home']}/.android/debug.keystore")
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
         release {
-            // Check if keystore properties exist
-            if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-            } else {
-                // Fallback to debug keystore for CI builds
-                storeFile file("${System.properties['user.home']}/.android/debug.keystore")
-                storePassword 'android'
-                keyAlias 'androiddebugkey'
-                keyPassword 'android'
-            }
+            storeFile file("${System.properties['user.home']}/.android/release.keystore")
+            storePassword 'autohub2024'
+            keyAlias 'autohub'
+            keyPassword 'autohub2024'
         }
     }
 

@@ -21,9 +21,22 @@ jobs:
         distribution: 'temurin'
         cache: gradle
     
-    - name: Create release keystore
+    - name: Create debug and release keystores
       run: |
         mkdir -p ~/.android
+        
+        # Create debug keystore
+        keytool -genkeypair -v \
+          -keystore ~/.android/debug.keystore \
+          -storepass android \
+          -alias androiddebugkey \
+          -keypass android \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -dname "CN=Android Debug,O=Android,C=US"
+        
+        # Create release keystore
         keytool -genkeypair -v \
           -keystore ~/.android/release.keystore \
           -storepass autohub2024 \
