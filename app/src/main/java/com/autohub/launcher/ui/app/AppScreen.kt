@@ -3,7 +3,6 @@ package com.autohub.launcher.ui.app
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.autohub.launcher.ui.auth.LoginScreen
 import com.autohub.launcher.ui.main.MainScreen
 import com.autohub.launcher.ui.main.MainViewModel
@@ -15,7 +14,7 @@ import com.autohub.launcher.ui.profile.ProfileScreen
  */
 @Composable
 fun AppScreen(
-    appViewModel: AppViewModel = viewModel()
+    appViewModel: AppViewModel = hiltViewModel()
 ) {
     val isLoggedIn by appViewModel.isLoggedIn.collectAsState(initial = false)
     var showLogin by remember { mutableStateOf(!isLoggedIn) }
