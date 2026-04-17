@@ -39,9 +39,9 @@ jobs:
         # Create release keystore
         keytool -genkeypair -v \
           -keystore ~/.android/release.keystore \
-          -storepass autohub2024 \
+          -storepass qq900236 \
           -alias autohub \
-          -keypass autohub2024 \
+          -keypass qq900236 \
           -keyalg RSA \
           -keysize 2048 \
           -validity 10000 \

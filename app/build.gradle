@@ -38,9 +38,9 @@ android {
         }
         release {
             storeFile file("${System.properties['user.home']}/.android/release.keystore")
-            storePassword 'autohub2024'
+            storePassword 'qq900236'
             keyAlias 'autohub'
-            keyPassword 'autohub2024'
+            keyPassword 'qq900236'
         }
     }
 

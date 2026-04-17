@@ -445,7 +445,7 @@ private fun BottomNavItem(
     screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
 ) {
     val iconSize = screenDims.iconSize
-    val fontSize = with(screenDims) { scaledSize(10.sp.value.dp) }
+    val fontSize = with(screenDims) { scaledSize(10.sp.value.dp).value.sp }
     
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
