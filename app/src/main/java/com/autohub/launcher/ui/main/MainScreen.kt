@@ -1,15 +1,13 @@
 package com.autohub.launcher.ui.main
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -18,11 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
@@ -48,1080 +43,261 @@ fun MainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val currentTime by viewModel.currentTime.collectAsState()
-    
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
+    val config = LocalConfiguration.current
+    val isLandscape = config.screenWidthDp > config.screenHeightDp
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(BgGradientStart, BgGradientEnd)
-                )
-            )
+            .background(Brush.verticalGradient(listOf(BgGradientStart, BgGradientEnd)))
     ) {
         if (isLandscape) {
-            LandscapeNewLayout(viewModel, uiState, currentTime)
+            LandscapeUI(viewModel, uiState, currentTime)
         } else {
-            PortraitNewLayout(viewModel, uiState, currentTime)
+            PortraitUI(viewModel, uiState, currentTime)
         }
     }
 }
 
-// ==================== 横屏布局 ====================
+// 横屏布局
 @Composable
-private fun LandscapeNewLayout(
+private fun LandscapeUI(
     viewModel: MainViewModel,
     uiState: MainUiState,
     currentTime: String
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         // 顶部状态栏
-        LandscapeStatusBar(currentTime, uiState.weather) { viewModel.openSettings() }
+        TopBar(currentTime, uiState.weather) { viewModel.openSettings() }
         
-        // 主内容区
+        // 主内容
         Row(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.weight(1f).fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 左侧地图弹窗 (45%)
-            MapCard(
-                modifier = Modifier.weight(0.45f).fillMaxHeight(),
-                onClick = { viewModel.openNavigationApp() }
-            )
+            // 左侧地图卡片
+            MapCard(Modifier.weight(0.5f)) { viewModel.openNavigationApp() }
             
-            // 右侧媒体弹窗 + 应用网格 (55%)
-            Column(
-                modifier = Modifier.weight(0.55f).fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // 媒体卡片
-                MediaCard(
-                    modifier = Modifier.fillMaxWidth().height(140.dp),
-                    onClick = { viewModel.openMusicApp() }
-                )
-                
-                // 应用网格
-                AppGridLandscape(uiState.installedApps) { viewModel.onAppClicked(it) }
+            // 右侧
+            Column(modifier = Modifier.weight(0.5f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                MediaCard { viewModel.openMusicApp() }
+                AppGrid(uiState.installedApps.take(6), 3) { viewModel.onAppClicked(it) }
             }
         }
         
-        // 底部应用栏
-        BottomDockBar(
-            selectedTab = uiState.selectedTab,
-            onTabSelected = { viewModel.onBottomNavTabSelected(it) }
-        )
+        // 底部栏
+        BottomBar(uiState.selectedTab) { viewModel.onBottomNavTabSelected(it) }
     }
 }
 
+// 竖屏布局
 @Composable
-private fun LandscapeStatusBar(time: String, weather: WeatherInfo?, onSettingsClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = time,
-            color = TextPrimary,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            weather?.let {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.WbSunny,
-                        contentDescription = null,
-                        tint = AccentOrange,
-                        modifier = Modifier.size(22.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = "${it.temperature}°",
-                        color = TextPrimary,
-                        fontSize = 18.sp
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = it.location ?: "昆山市",
-                        color = TextSecondary,
-                        fontSize = 14.sp
-                    )
-                }
-            }
-            
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "设置",
-                    tint = TextPrimary,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-        }
-    }
-}
-
-// ==================== 地图弹窗组件 ====================
-@Composable
-private fun MapCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(
-        modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF1a2744),
-                            Color(0xFF0f1629)
-                        )
-                    )
-                )
-        ) {
-            // 背景路网纹理
-            RoadNetworkPattern(modifier = Modifier.fillMaxSize())
-            
-            // 关闭按钮
-            IconButton(
-                onClick = { },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(12.dp)
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f))
-            ) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = "关闭",
-                    tint = Color.White,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-            
-            // 主内容
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 左侧：图标 + 标题 + 按钮
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    // 图标 + 应用名
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(AccentBlue.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Map,
-                                contentDescription = null,
-                                tint = AccentBlue,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        Text(
-                            text = "高德地图",
-                            color = TextPrimary,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    
-                    // 主标题
-                    Text(
-                        text = "连接真实世界",
-                        color = TextPrimary,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    // 副标题
-                    Text(
-                        text = "让出行更美好",
-                        color = TextSecondary,
-                        fontSize = 16.sp
-                    )
-                    
-                    Spacer(Modifier.height(16.dp))
-                    
-                    // 打开地图按钮
-                    Button(
-                        onClick = onClick,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AccentBlue
-                        ),
-                        shape = RoundedCornerShape(24.dp),
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Send,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = "打开地图",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-                
-                // 右侧：立体导航箭头
-                NavigationArrow3D(modifier = Modifier.size(120.dp))
-            }
-        }
-    }
-}
-
-// 路网纹理背景
-@Composable
-private fun RoadNetworkPattern(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        val lineColor = Color.White.copy(alpha = 0.05f)
-        val gridSize = 40.dp.toPx()
-        
-        // 绘制横向线
-        var y = 0f
-        while (y < size.height) {
-            drawLine(
-                color = lineColor,
-                start = Offset(0f, y),
-                end = Offset(size.width, y),
-                strokeWidth = 1.dp.toPx()
-            )
-            y += gridSize
-        }
-        
-        // 绘制纵向线
-        var x = 0f
-        while (x < size.width) {
-            drawLine(
-                color = lineColor,
-                start = Offset(x, 0f),
-                end = Offset(x, size.height),
-                strokeWidth = 1.dp.toPx()
-            )
-            x += gridSize
-        }
-        
-        // 添加一些道路弧线
-        drawArc(
-            color = AccentBlue.copy(alpha = 0.1f),
-            startAngle = 0f,
-            sweepAngle = 90f,
-            useCenter = false,
-            topLeft = Offset(size.width * 0.3f, size.height * 0.2f),
-            size = androidx.compose.ui.geometry.Size(size.width * 0.4f, size.height * 0.3f),
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3.dp.toPx())
-        )
-    }
-}
-
-// 立体导航箭头
-@Composable
-private fun NavigationArrow3D(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        // 外圈光晕
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            AccentBlue.copy(alpha = 0.3f),
-                            AccentBlue.copy(alpha = 0f)
-                        )
-                    )
-                )
-        )
-        
-        // 箭头主体
-        Canvas(modifier = Modifier.size(60.dp)) {
-            val path = Path().apply {
-                moveTo(size.width / 2, 0f)
-                lineTo(size.width, size.height * 0.7f)
-                lineTo(size.width / 2, size.height * 0.5f)
-                lineTo(0f, size.height * 0.7f)
-                close()
-            }
-            
-            drawPath(
-                path = path,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        AccentBlue,
-                        AccentBlue.copy(alpha = 0.7f)
-                    )
-                )
-            )
-            
-            // 高光
-            val highlightPath = Path().apply {
-                moveTo(size.width / 2, size.height * 0.1f)
-                lineTo(size.width * 0.7f, size.height * 0.6f)
-                lineTo(size.width / 2, size.height * 0.45f)
-                lineTo(size.width * 0.3f, size.height * 0.6f)
-                close()
-            }
-            
-            drawPath(
-                path = highlightPath,
-                color = Color.White.copy(alpha = 0.3f)
-            )
-        }
-    }
-}
-
-// ==================== 媒体播放弹窗 ====================
-@Composable
-private fun MediaCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(
-        modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF2d3748),
-                            Color(0xFF1a202c)
-                        )
-                    )
-                )
-        ) {
-            // 雪山背景图
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.CenterEnd)
-            ) {
-                // 渐变遮罩
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color(0xFF2d3748),
-                                    Color(0x001a202c)
-                                )
-                            )
-                        )
-                )
-                
-                // 雪山图案
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    // 雪山轮廓
-                    val mountainPath = Path().apply {
-                        moveTo(size.width * 0.5f, size.height * 0.2f)
-                        lineTo(size.width * 0.8f, size.height * 0.8f)
-                        lineTo(size.width * 0.2f, size.height * 0.8f)
-                        close()
-                    }
-                    
-                    drawPath(
-                        path = mountainPath,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.15f),
-                                Color.White.copy(alpha = 0.05f)
-                            )
-                        )
-                    )
-                }
-            }
-            
-            // 暂无信息文字
-            Text(
-                text = "暂无信息",
-                color = TextSecondary,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp)
-            )
-            
-            // 播放控制按钮行
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MediaControlButton(Icons.Default.GraphicEq, "波形")
-                MediaControlButton(Icons.Default.Person, "头像")
-                MediaControlButton(Icons.Default.SkipPrevious, "上一曲")
-                MediaControlButton(
-                    Icons.Default.PlayArrow,
-                    "播放",
-                    isPrimary = true,
-                    onClick = onClick
-                )
-                MediaControlButton(Icons.Default.SkipNext, "下一曲")
-                MediaControlButton(Icons.Default.Lock, "锁定")
-                MediaControlButton(Icons.Default.Close, "关闭")
-            }
-        }
-    }
-}
-
-@Composable
-private fun MediaControlButton(
-    icon: ImageVector,
-    contentDescription: String,
-    isPrimary: Boolean = false,
-    onClick: () -> Unit = {}
-) {
-    Box(
-        modifier = Modifier
-            .size(if (isPrimary) 40.dp else 32.dp)
-            .clip(CircleShape)
-            .background(
-                if (isPrimary) AccentBlue else Color.White.copy(alpha = 0.1f)
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            icon,
-            contentDescription = contentDescription,
-            tint = Color.White,
-            modifier = Modifier.size(if (isPrimary) 24.dp else 18.dp)
-        )
-    }
-}
-
-// ==================== 应用网格 ====================
-@Composable
-private fun AppGridLandscape(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(5),
-        modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        userScrollEnabled = false
-    ) {
-        items(apps.take(10)) { app ->
-            AppIconItem(
-                app = app,
-                modifier = Modifier.aspectRatio(1f)
-            ) { onAppClick(app) }
-        }
-    }
-}
-
-@Composable
-private fun AppIconItem(
-    app: AppInfo,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .clickable(onClick = onClick)
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            AccentBlue.copy(alpha = 0.8f),
-                            AccentBlue.copy(alpha = 0.4f)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = app.name.take(1),
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = app.name,
-            color = TextPrimary,
-            fontSize = 11.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-// ==================== 底部 Dock 栏 ====================
-@Composable
-private fun BottomDockBar(
-    selectedTab: BottomNavTab,
-    onTabSelected: (BottomNavTab) -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = BottomBarBackground,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 左侧应用图标
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DockIcon(Icons.Default.Apps, "我的应用")
-                DockIcon(Icons.Default.Settings, "系统设置")
-                DockIcon(Icons.Default.Palette, "主题中心")
-                DockIcon(Icons.Default.MusicNote, "酷我VIP")
-                DockIcon(Icons.Default.Apps, "轻应用")
-            }
-            
-            // 中间黑胶唱片控件
-            VinylRecordPlayer()
-            
-            // 右侧应用图标
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DockIcon(Icons.Default.Store, "应用商店")
-                DockIcon(Icons.Default.DirectionsCar, "车主服务")
-                DockIcon(Icons.Default.Home, "返回桌面")
-                DockIcon(Icons.Default.Tv, "沙发管家")
-                DockIcon(Icons.Default.Navigation, "百度CarLife")
-                DockIcon(Icons.Default.Add, "添加")
-            }
-        }
-    }
-}
-
-@Composable
-private fun DockIcon(icon: ImageVector, contentDescription: String) {
-    Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable { }
-            .padding(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            icon,
-            contentDescription = contentDescription,
-            tint = BottomBarIcon,
-            modifier = Modifier.size(24.dp)
-        )
-    }
-}
-
-@Composable
-private fun VinylRecordPlayer() {
-    Box(
-        modifier = Modifier
-            .size(56.dp)
-            .clip(CircleShape)
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF333333),
-                        Color(0xFF1a1a1a)
-                    )
-                )
-            )
-            .border(2.dp, AccentBlue, CircleShape),
-        contentAlignment = Alignment.Center
-    ) {
-        // 黑胶唱片中心圆
-        Box(
-            modifier = Modifier
-                .size(16.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF333333))
-                .border(1.dp, Color.White.copy(alpha = 0.3f), CircleShape)
-        )
-        
-        // 唱片纹理
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            for (i in 0..2) {
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.05f),
-                    radius = (size.minDimension / 2) * (0.4f + i * 0.15f),
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 0.5.dp.toPx())
-                )
-            }
-        }
-    }
-}
-
-// ==================== 竖屏布局 ====================
-@Composable
-private fun PortraitNewLayout(
+private fun PortraitUI(
     viewModel: MainViewModel,
     uiState: MainUiState,
     currentTime: String
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // 顶部状态栏
-        PortraitStatusBar(currentTime, uiState.weather) { viewModel.openSettings() }
+        TopBar(currentTime, uiState.weather) { viewModel.openSettings() }
         
-        // 主内容区（可滚动）
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(12.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Spacer(Modifier.height(8.dp))
-            
-            // 地图弹窗
-            PortraitMapCard(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
-                onClick = { viewModel.openNavigationApp() }
-            )
-            
-            // 媒体播放卡片
-            PortraitMediaCard(
-                modifier = Modifier.fillMaxWidth().height(120.dp),
-                onClick = { viewModel.openMusicApp() }
-            )
-            
-            // 快捷应用标签
-            Text(
-                text = "快捷应用",
-                color = TextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(horizontal = 4.dp)
-            )
-            
-            // 应用网格 5x2
-            PortraitAppGrid(uiState.installedApps) { viewModel.onAppClicked(it) }
-            
-            Spacer(Modifier.height(8.dp))
+            MapCard(Modifier.fillMaxWidth().height(160.dp)) { viewModel.openNavigationApp() }
+            MediaCard { viewModel.openMusicApp() }
+            Text("快捷应用", color = TextSecondary, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            AppGrid(uiState.installedApps.take(8), 4) { viewModel.onAppClicked(it) }
         }
         
-        // 系统功能栏
-        SystemFunctionBar(
-            onHomeClick = { },
-            onNavClick = { viewModel.openNavigationApp() },
-            onRefreshClick = { viewModel.onResume() },
-            onLockClick = { },
-            onRotateClick = { },
-            onVolumeClick = { }
-        )
+        BottomBar(uiState.selectedTab) { viewModel.onBottomNavTabSelected(it) }
+    }
+}
+
+// 顶部状态栏
+@Composable
+private fun TopBar(time: String, weather: WeatherInfo?, onSettings: () -> Unit) {
+    val date = LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd", Locale.getDefault()))
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(time, color = TextPrimary, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(8.dp))
+            Text(date, color = TextSecondary, fontSize = 14.sp)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.WbSunny, null, tint = Color(0xFFFFC107), modifier = Modifier.size(20.dp))
+            Text(" ${weather?.temperature ?: 25}°", color = TextPrimary, fontSize = 14.sp)
+            IconButton(onSettings) { Icon(Icons.Default.Settings, null, tint = TextPrimary) }
+        }
+    }
+}
+
+// 地图卡片
+@Composable
+private fun MapCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Card(
+        modifier = modifier.clip(RoundedCornerShape(20.dp)).clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xDD1a1a2e))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 背景
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .background(Brush.linearGradient(listOf(Color(0xFF1E4D78), Color(0xFF0D2840))))
+            )
+            
+            // 内容
+            Row(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 图标
+                Box(
+                    modifier = Modifier.size(56.dp).clip(CircleShape).background(Color(0x33FF6D00)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Navigation, null, tint = Color(0xFFFF6D00), modifier = Modifier.size(32.dp))
+                }
+                
+                Spacer(Modifier.width(16.dp))
+                
+                // 文字
+                Column {
+                    Text("导航", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text("点击开始导航", color = TextSecondary, fontSize = 12.sp)
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SmallChip("回家")
+                        SmallChip("公司")
+                    }
+                }
+            }
+            
+            // 底部装饰
+            Box(
+                modifier = Modifier.fillMaxWidth().height(3.dp).align(Alignment.BottomCenter)
+                    .background(Color(0xFFFF6D00))
+            )
+        }
     }
 }
 
 @Composable
-private fun PortraitStatusBar(time: String, weather: WeatherInfo?, onSettingsClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+private fun SmallChip(text: String) {
+    Surface(
+        modifier = Modifier.clip(RoundedCornerShape(12.dp)),
+        color = Color(0x20FFFFFF),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        // 左侧：用户头像 + 信号 + 通知
+        Text(text, color = TextPrimary, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+    }
+}
+
+// 媒体卡片
+@Composable
+private fun MediaCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().height(80.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xDD2D1B55))
+    ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(AccentBlue.copy(alpha = 0.3f)),
+                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(10.dp)).background(Color(0x20FFFFFF)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
+                Icon(Icons.Default.MusicNote, null, tint = AccentGreen, modifier = Modifier.size(28.dp))
             }
-            Icon(
-                Icons.Default.SignalCellularAlt,
-                contentDescription = null,
-                tint = AccentGreen,
-                modifier = Modifier.size(18.dp)
-            )
-            Icon(
-                Icons.Default.Notifications,
-                contentDescription = null,
-                tint = TextSecondary,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-        
-        // 中间：时间
-        Text(
-            text = time,
-            color = TextPrimary,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-        
-        // 右侧：位置 + 天气 + 设置
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            weather?.let {
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = it.location ?: "昆山市",
-                        color = TextSecondary,
-                        fontSize = 12.sp
-                    )
-                    Text(
-                        text = "${it.temperature}°",
-                        color = TextPrimary,
-                        fontSize = 14.sp
-                    )
-                }
-                Icon(
-                    Icons.Default.WbSunny,
-                    contentDescription = null,
-                    tint = AccentOrange,
-                    modifier = Modifier.size(20.dp)
-                )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("正在播放", color = TextSecondary, fontSize = 11.sp)
+                Text("点击播放音乐", color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "设置",
-                    tint = TextPrimary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PortraitMapCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(
-        modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF1a2744),
-                            Color(0xFF0f1629)
-                        )
-                    )
-                )
-        ) {
-            // 路网纹理
-            RoadNetworkPattern(modifier = Modifier.fillMaxSize())
-            
-            // 内容
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+            Box(
+                modifier = Modifier.size(40.dp).clip(CircleShape).background(Color(0x30FFFFFF)),
+                contentAlignment = Alignment.Center
             ) {
-                // 关闭按钮
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.1f))
-                ) {
-                    Icon(
-                        Icons.Default.Close,
-                        contentDescription = "关闭",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-                
-                // 底部内容
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(AccentBlue.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Map,
-                                contentDescription = null,
-                                tint = AccentBlue,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        Text(
-                            text = "高德地图",
-                            color = TextPrimary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    
-                    Spacer(Modifier.height(8.dp))
-                    
-                    Text(
-                        text = "连接真实世界",
-                        color = TextPrimary,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Text(
-                        text = "让出行更美好",
-                        color = TextSecondary,
-                        fontSize = 14.sp
-                    )
-                }
+                Icon(Icons.Default.PlayArrow, null, tint = TextPrimary, modifier = Modifier.size(24.dp))
             }
-            
-            // 导航箭头
-            NavigationArrow3D(
-                modifier = Modifier
-                    .size(80.dp)
-                    .align(Alignment.TopStart)
-                    .padding(start = 20.dp, top = 40.dp)
-            )
         }
     }
 }
 
+// 应用网格
 @Composable
-private fun PortraitMediaCard(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(
-        modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF2d3748),
-                            Color(0xFF1a202c)
-                        )
-                    )
-                )
-        ) {
-            Text(
-                text = "暂无信息",
-                color = TextSecondary,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(12.dp)
-            )
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                MediaControlButton(Icons.Default.GraphicEq, "波形")
-                MediaControlButton(Icons.Default.Person, "头像")
-                MediaControlButton(Icons.Default.SkipPrevious, "上一曲")
-                MediaControlButton(Icons.Default.PlayArrow, "播放", isPrimary = true, onClick = onClick)
-                MediaControlButton(Icons.Default.SkipNext, "下一曲")
-                MediaControlButton(Icons.Default.Lock, "锁定")
+private fun AppGrid(apps: List<AppInfo>, columns: Int, onClick: (AppInfo) -> Unit) {
+    val rows = apps.chunked(columns)
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        rows.forEach { row ->
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                row.forEach { app ->
+                    AppItem(Modifier.weight(1f), app) { onClick(app) }
+                }
+                repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
             }
         }
     }
 }
 
 @Composable
-private fun PortraitAppGrid(apps: List<AppInfo>, onAppClick: (AppInfo) -> Unit) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(5),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        userScrollEnabled = false
-    ) {
-        items(apps.take(10)) { app ->
-            AppIconItemPortrait(app) { onAppClick(app) }
-        }
-    }
-}
-
-@Composable
-private fun AppIconItemPortrait(app: AppInfo, onClick: () -> Unit) {
+private fun AppItem(modifier: Modifier, app: AppInfo, onClick: () -> Unit) {
     Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .clickable(onClick = onClick)
-            .padding(6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = modifier.clip(RoundedCornerShape(12.dp)).background(Color(0x20FFFFFF)).clickable(onClick = onClick).padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            AccentBlue.copy(alpha = 0.8f),
-                            AccentBlue.copy(alpha = 0.4f)
-                        )
-                    )
-                ),
+            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp))
+                .background(Brush.linearGradient(listOf(Color(0xFF2196F3), Color(0xFF1976D2)))),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = app.name.take(1),
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Text(app.name.take(1), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.height(4.dp))
-        Text(
-            text = app.name,
-            color = TextPrimary,
-            fontSize = 10.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
+        Text(app.name, color = TextPrimary, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
+// 底部栏
 @Composable
-private fun SystemFunctionBar(
-    onHomeClick: () -> Unit,
-    onNavClick: () -> Unit,
-    onRefreshClick: () -> Unit,
-    onLockClick: () -> Unit,
-    onRotateClick: () -> Unit,
-    onVolumeClick: () -> Unit
-) {
+private fun BottomBar(selected: BottomNavTab, onSelect: (BottomNavTab) -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = Color(0xFF0d1117),
+        color = Color(0xE61a1a2e),
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            FunctionButton(Icons.Default.Home, "主页", onHomeClick)
-            FunctionButton(Icons.Default.Navigation, "导航", onNavClick)
-            FunctionButton(Icons.Default.Refresh, "刷新", onRefreshClick)
-            FunctionButton(Icons.Default.Lock, "锁定", onLockClick)
-            FunctionButton(Icons.Default.ScreenRotation, "旋转", onRotateClick)
-            FunctionButton(Icons.Default.VolumeUp, "音量", onVolumeClick)
+            DockBtn(Icons.Outlined.Home, Icons.Filled.Home, "首页", selected == BottomNavTab.Home) { onSelect(BottomNavTab.Home) }
+            DockBtn(Icons.Outlined.Navigation, Icons.Filled.Navigation, "导航", selected == BottomNavTab.Navigation, Color(0xFFFF6D00)) { onSelect(BottomNavTab.Navigation) }
+            DockBtn(Icons.Outlined.MusicNote, Icons.Filled.MusicNote, "音乐", selected == BottomNavTab.Music, AccentGreen) { onSelect(BottomNavTab.Music) }
+            DockBtn(Icons.Outlined.VideoLibrary, Icons.Filled.VideoLibrary, "视频", selected == BottomNavTab.Video) { onSelect(BottomNavTab.Video) }
+            DockBtn(Icons.Outlined.Settings, Icons.Filled.Settings, "设置", selected == BottomNavTab.Settings) { onSelect(BottomNavTab.Settings) }
         }
     }
 }
 
 @Composable
-private fun FunctionButton(
-    icon: ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit
-) {
+private fun DockBtn(icon: ImageVector, activeIcon: ImageVector, label: String, selected: Boolean, accent: Color = Color(0xFF2196F3), onClick: () -> Unit) {
+    val color by animateColorAsState(if (selected) accent else Color(0x80FFFFFF))
     Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
-            .padding(8.dp),
+        modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            icon,
-            contentDescription = contentDescription,
-            tint = TextSecondary,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = contentDescription,
-            color = TextSecondary,
-            fontSize = 10.sp
-        )
+        Icon(if (selected) activeIcon else icon, label, tint = color, modifier = Modifier.size(24.dp))
+        Spacer(Modifier.height(2.dp))
+        Text(label, color = color, fontSize = 10.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
     }
 }
