@@ -1,6 +1,7 @@
 package com.autohub.launcher.ui.main
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -52,7 +53,7 @@ fun MainScreen(
             TopBar(
                 time = currentTime,
                 weather = uiState.weather,
-                onSettingsClick = onNavigateToSettings,
+                onSettingsClick = { viewModel.openSettings() },
                 onProfileClick = onNavigateToProfile,
                 screenDims = screenDims
             )
@@ -62,30 +63,18 @@ fun MainScreen(
                 selectedTab = uiState.selectedTab,
                 onTabSelected = { tab ->
                     viewModel.onBottomNavTabSelected(tab)
-                    when (tab) {
-                        BottomNavTab.Navigation -> onNavigateToNavigation()
-                        BottomNavTab.Music -> onNavigateToMusic()
-                        BottomNavTab.Video -> onNavigateToVideo()
-                        BottomNavTab.Settings -> onNavigateToSettings()
-                        BottomNavTab.Home -> {}
-                    }
                 },
                 screenDims = screenDims
             )
         }
     ) { paddingValues ->
-        when (uiState.selectedTab) {
-            BottomNavTab.Home -> HomeContent(
-                modifier = Modifier.padding(paddingValues),
-                apps = uiState.installedApps,
-                onAppClicked = { app -> viewModel.onAppClicked(app) },
-                screenDims = screenDims
-            )
-            BottomNavTab.Navigation -> PlaceholderContent("导航模块", screenDims)
-            BottomNavTab.Music -> PlaceholderContent("音乐模块", screenDims)
-            BottomNavTab.Video -> PlaceholderContent("视频模块", screenDims)
-            BottomNavTab.Settings -> PlaceholderContent("设置模块", screenDims)
-        }
+        // 始终显示首页内容，其他按钮直接打开对应应用
+        HomeContent(
+            modifier = Modifier.padding(paddingValues),
+            apps = uiState.installedApps,
+            onAppClicked = { app -> viewModel.onAppClicked(app) },
+            screenDims = screenDims
+        )
     }
 }
 
@@ -293,6 +282,7 @@ private fun AppGridItem(
             .fillMaxWidth()
             .clip(RoundedCornerShape(screenDims.cardCornerRadius))
             .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable { onClick() }
             .padding(vertical = spacing),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
