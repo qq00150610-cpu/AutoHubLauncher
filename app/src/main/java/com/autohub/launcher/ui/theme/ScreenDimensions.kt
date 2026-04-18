@@ -53,9 +53,9 @@ data class ScreenDimensions(
      */
     val cardCornerRadius: Dp
         get() = when {
-            widthDp < 360.dp -> 8.dp
-            widthDp < 600.dp -> 12.dp
-            else -> 16.dp
+            widthDp < 360.dp -> 12.dp
+            widthDp < 600.dp -> 16.dp
+            else -> 24.dp
         }
     
     /**
@@ -63,8 +63,8 @@ data class ScreenDimensions(
      */
     val iconSize: Dp
         get() = when {
-            widthDp < 360.dp -> 20.dp
-            widthDp < 600.dp -> 24.dp
+            widthDp < 360.dp -> 24.dp
+            widthDp < 600.dp -> 28.dp
             else -> 32.dp
         }
     
@@ -73,8 +73,8 @@ data class ScreenDimensions(
      */
     val largeIconSize: Dp
         get() = when {
-            widthDp < 360.dp -> 36.dp
-            widthDp < 600.dp -> 48.dp
+            widthDp < 360.dp -> 48.dp
+            widthDp < 600.dp -> 56.dp
             else -> 64.dp
         }
     
@@ -83,8 +83,8 @@ data class ScreenDimensions(
      */
     val gridColumns: Int
         get() = when {
-            widthDp < 360.dp -> 2
-            widthDp < 480.dp -> 3
+            widthDp < 360.dp -> 3
+            widthDp < 480.dp -> 4
             widthDp < 600.dp -> 4
             widthDp < 840.dp -> 5
             else -> 6
@@ -134,39 +134,33 @@ fun Dp.adapted(): Dp {
 }
 
 /**
- * 预定义的适配尺寸
+ * 预定义的适配尺寸 - HiCar 风格
  */
-object AdaptiveSizes {
-    // 小尺寸元素
-    val smallPadding: Dp @Composable get() = rememberScreenDimensions().run { 
-        scaledSize(8.dp) 
-    }
+object HiCarSizes {
+    // 状态栏高度
+    val statusBarHeight: Dp @Composable get() = 80.dp
     
-    // 标准内边距
-    val standardPadding: Dp @Composable get() = rememberScreenDimensions().contentPadding
+    // DOCK 栏高度
+    val dockBarHeight: Dp @Composable get() = 72.dp
     
-    // 卡片内边距
-    val cardPadding: Dp @Composable get() = rememberScreenDimensions().run { 
-        scaledSize(12.dp) 
-    }
+    // 导航卡片高度
+    val navCardHeight: Dp @Composable get() = 160.dp
     
-    // 列表项高度
-    val listItemHeight: Dp @Composable get() = rememberScreenDimensions().run { 
-        scaledSize(56.dp) 
-    }
+    // 音乐卡片高度
+    val musicCardHeight: Dp @Composable get() = 120.dp
     
-    // 按钮高度
-    val buttonHeight: Dp @Composable get() = rememberScreenDimensions().run { 
-        scaledSize(48.dp) 
-    }
+    // 大卡片圆角
+    val largeCardCornerRadius: Dp @Composable get() = 24.dp
     
-    // 标题字体大小
-    val titleFontSize: Dp @Composable get() = rememberScreenDimensions().run { 
-        scaledSize(20.dp) 
-    }
+    // 小卡片圆角
+    val smallCardCornerRadius: Dp @Composable get() = 16.dp
     
-    // 正文体大小
-    val bodyFontSize: Dp @Composable get() = rememberScreenDimensions().run { 
-        scaledSize(14.dp) 
-    }
+    // 图标尺寸
+    val iconSize: Dp @Composable get() = 48.dp
+    
+    // DOCK 图标尺寸
+    val dockIconSize: Dp @Composable get() = 28.dp
+    
+    // 应用图标尺寸
+    val appIconSize: Dp @Composable get() = 52.dp
 }

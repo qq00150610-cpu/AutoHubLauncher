@@ -1,37 +1,37 @@
 package com.autohub.launcher.ui.main
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.autohub.launcher.domain.model.AppInfo
 import com.autohub.launcher.domain.model.WeatherInfo
-import com.autohub.launcher.ui.theme.rememberScreenDimensions
+import com.autohub.launcher.ui.theme.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun MainScreen(
@@ -46,412 +46,539 @@ fun MainScreen(
     val currentTime by viewModel.currentTime.collectAsState()
     val screenDims = rememberScreenDimensions()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopBar(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(HiCarGradientStart, HiCarGradientEnd)
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // 顶部状态栏
+            HiCarStatusBar(
                 time = currentTime,
                 weather = uiState.weather,
                 onSettingsClick = { viewModel.openSettings() },
-                onProfileClick = onNavigateToProfile,
-                screenDims = screenDims
+                onProfileClick = onNavigateToProfile
             )
-        },
-        bottomBar = {
-            BottomNavigation(
+
+            // 主内容区域
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // 导航卡片（大卡片）
+                HiCarNavigationCard(
+                    onClick = { viewModel.openNavigationApp() }
+                )
+
+                // 音乐卡片
+                HiCarMusicCard(
+                    onClick = { viewModel.openMusicApp() }
+                )
+
+                // 快捷应用标题
+                Text(
+                    text = "快捷应用",
+                    color = HiCarTextSecondary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+
+                // 快捷应用网格
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(4),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    items(uiState.installedApps) { app ->
+                        HiCarAppGridItem(
+                            app = app,
+                            onClick = { viewModel.onAppClicked(app) }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // 底部 DOCK 栏
+            HiCarDockBar(
                 selectedTab = uiState.selectedTab,
-                onTabSelected = { tab ->
-                    viewModel.onBottomNavTabSelected(tab)
-                },
-                screenDims = screenDims
+                onTabSelected = { tab -> viewModel.onBottomNavTabSelected(tab) }
             )
         }
-    ) { paddingValues ->
-        // 始终显示首页内容，其他按钮直接打开对应应用
-        HomeContent(
-            modifier = Modifier.padding(paddingValues),
-            apps = uiState.installedApps,
-            onAppClicked = { app -> viewModel.onAppClicked(app) },
-            screenDims = screenDims
-        )
     }
 }
 
 @Composable
-private fun TopBar(
+private fun HiCarStatusBar(
     time: String,
     weather: WeatherInfo?,
     onSettingsClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
+    onProfileClick: () -> Unit
 ) {
-    val padding = screenDims.contentPadding
-    val baseFontSize = with(screenDims) { scaledSize(16.sp.value.dp) }
-    val baseFontSizeSp = baseFontSize.value.sp
-    
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 2.dp
+    val today = LocalDate.now()
+    val dateFormatter = DateTimeFormatter.ofPattern("MM月dd日 E")
+    val dateString = today.format(dateFormatter)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // 左侧 - 时间日期
+        Column {
+            Text(
+                text = time,
+                color = HiCarTextPrimary,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = dateString,
+                color = HiCarTextSecondary,
+                fontSize = 14.sp
+            )
+        }
+
+        // 右侧 - 天气和设置
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(padding),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // 天气信息
+            weather?.let {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.WbSunny,
+                        contentDescription = null,
+                        tint = HiCarWarning,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "${it.temperature}°",
+                        color = HiCarTextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            } ?: run {
+                // 默认天气图标
+                Icon(
+                    imageVector = Icons.Default.WbSunny,
+                    contentDescription = null,
+                    tint = HiCarWarning,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = "25°",
+                    color = HiCarTextPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            // 设置按钮
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "设置",
+                    tint = HiCarTextPrimary,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HiCarNavigationCard(
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(HiCarNavCardGradient)
+                )
+        ) {
+            // 背景装饰 - 道路图形
+            Icon(
+                imageVector = Icons.Default.NearMe,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.1f),
+                modifier = Modifier
+                    .size(200.dp)
+                    .align(Alignment.CenterEnd)
+                    .offset(x = 40.dp)
+            )
+
+            // 内容
             Row(
-                horizontalArrangement = Arrangement.spacedBy(screenDims.scaledSize(16.dp)),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Time
-                Text(
-                    text = time,
-                    fontSize = (baseFontSizeSp.value * 1.75f).sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                // 左侧图标
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(HiCarAccentOrange.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Navigation,
+                        contentDescription = null,
+                        tint = HiCarAccentOrange,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
 
-                // Weather
-                weather?.let {
+                Spacer(modifier = Modifier.width(20.dp))
+
+                // 文字信息
+                Column {
+                    Text(
+                        text = "导航",
+                        color = HiCarTextPrimary,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "点击开始导航",
+                        color = HiCarTextSecondary,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    // 快捷目的地按钮
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(screenDims.scaledSize(8.dp)),
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "${it.temperature}°",
-                            fontSize = (baseFontSizeSp.value * 1.25f).sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = it.condition,
-                            fontSize = baseFontSizeSp
-                        )
+                        QuickDestinationChip("回家")
+                        QuickDestinationChip("公司")
                     }
                 }
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(screenDims.scaledSize(8.dp)),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // User avatar
-                IconButton(onClick = onProfileClick) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "个人中心",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(screenDims.largeIconSize)
-                    )
-                }
-
-                // Settings button
-                IconButton(onClick = onSettingsClick) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(screenDims.iconSize)
-                    )
-                }
-            }
+            // 底部装饰线
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .align(Alignment.BottomCenter)
+                    .background(HiCarAccentOrange)
+            )
         }
     }
 }
 
 @Composable
-private fun HomeContent(
-    modifier: Modifier = Modifier,
-    apps: List<AppInfo>,
-    onAppClicked: (AppInfo) -> Unit,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
-) {
-    val padding = screenDims.contentPadding
-    val spacing = screenDims.scaledSize(12.dp)
-    
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(padding),
-        verticalArrangement = Arrangement.spacedBy(spacing)
-    ) {
-        // Smart Cards
-        SmartCardsSection(screenDims)
-
-        // Quick Apps Grid
-        SectionTitle("快捷应用", screenDims)
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(screenDims.gridColumns),
-            horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(spacing),
-            modifier = Modifier.weight(1f)
-        ) {
-            items(apps) { app ->
-                AppGridItem(app = app, onClick = { onAppClicked(app) }, screenDims = screenDims)
-            }
-        }
-
-        // Background Apps
-        if (apps.isNotEmpty()) {
-            SectionTitle("后台应用", screenDims)
-            BackgroundAppsBar(apps = apps, screenDims = screenDims)
-        }
-    }
-}
-
-@Composable
-private fun SmartCardsSection(screenDims: com.autohub.launcher.ui.theme.ScreenDimensions) {
-    val spacing = screenDims.scaledSize(12.dp)
-    
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(spacing)
-    ) {
-        // Weather Card
-        SmartCard(
-            modifier = Modifier.weight(1f),
-            title = "天气",
-            icon = "☀️",
-            content = "25°C 晴\n深圳·南山区",
-            screenDims = screenDims
-        )
-
-        // Schedule Card
-        SmartCard(
-            modifier = Modifier.weight(1f),
-            title = "日程",
-            icon = "📅",
-            content = "14:00 会议\n科技园B座",
-            screenDims = screenDims
-        )
-    }
-}
-
-@Composable
-private fun SmartCard(
-    modifier: Modifier = Modifier,
-    title: String,
-    icon: String,
-    content: String,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
-) {
-    val cardHeight = screenDims.scaledSize(100.dp)
-    val padding = screenDims.scaledSize(12.dp)
-    val cornerRadius = screenDims.cardCornerRadius
-    val fontSize = with(screenDims) { scaledSize(14.sp.value.dp).value.sp }
-    
+private fun QuickDestinationChip(text: String) {
     Surface(
-        modifier = modifier.height(cardHeight),
-        shape = RoundedCornerShape(cornerRadius),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+        color = HiCarTextPrimary.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "$icon $title",
-                fontSize = fontSize,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = content,
-                fontSize = (fontSize.value * 0.875f).sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = text,
+            color = HiCarTextPrimary,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
     }
 }
 
 @Composable
-private fun AppGridItem(
-    app: AppInfo,
-    onClick: () -> Unit,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
+private fun HiCarMusicCard(
+    onClick: () -> Unit
 ) {
-    val iconSize = screenDims.scaledSize(48.dp)
-    val spacing = screenDims.scaledSize(6.dp)
-    val fontSize = with(screenDims) { scaledSize(11.sp.value.dp).value.sp }
-    
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(screenDims.cardCornerRadius))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .clickable { onClick() }
-            .padding(vertical = spacing),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .height(120.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        )
     ) {
         Box(
             modifier = Modifier
-                .size(iconSize)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(HiCarMusicCardGradient)
+                )
         ) {
-            Text(
-                text = app.name.first().toString(),
-                fontSize = (fontSize.value * 1.5f).sp,
-                color = Color.White
-            )
-        }
-        Spacer(modifier = Modifier.height(spacing))
-        Text(
-            text = app.name,
-            fontSize = fontSize,
-            maxLines = 1,
-            textAlign = TextAlign.Center
-        )
-    }
-}
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 专辑封面占位
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MusicNote,
+                        contentDescription = null,
+                        tint = HiCarPrimaryLight,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
 
-@Composable
-private fun BackgroundAppsBar(
-    apps: List<AppInfo>,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
-) {
-    val padding = screenDims.scaledSize(10.dp)
-    val spacing = screenDims.scaledSize(12.dp)
-    val fontSize = with(screenDims) { scaledSize(11.sp.value.dp).value.sp }
-    
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(screenDims.cardCornerRadius),
-        color = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Row(
-            modifier = Modifier.padding(padding),
-            horizontalArrangement = Arrangement.spacedBy(spacing)
-        ) {
-            apps.take(5).forEach { app ->
-                Text(text = "🗺️ ${app.name}", fontSize = fontSize)
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // 歌曲信息
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "正在播放",
+                        color = HiCarTextSecondary,
+                        fontSize = 12.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "点击播放音乐",
+                        color = HiCarTextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                // 播放控制
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = onClick,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(HiCarTextPrimary.copy(alpha = 0.2f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "播放",
+                            tint = HiCarTextPrimary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SectionTitle(
-    title: String,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
+private fun HiCarAppGridItem(
+    app: AppInfo,
+    onClick: () -> Unit
 ) {
-    val fontSize = with(screenDims) { scaledSize(16.sp.value.dp).value.sp }
-    val padding = screenDims.scaledSize(6.dp)
-    
-    Text(
-        text = title,
-        fontSize = fontSize,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(vertical = padding)
+    var isPressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1f,
+        label = "scale"
     )
-}
 
-@Composable
-private fun PlaceholderContent(
-    title: String,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
-) {
-    val fontSize = with(screenDims) { scaledSize(20.sp.value.dp).value.sp }
-    
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Column(
+        modifier = Modifier
+            .scale(scale)
+            .clip(RoundedCornerShape(16.dp))
+            .background(HiCarGlassBackground)
+            .clickable(
+                onClick = {
+                    isPressed = true
+                    onClick()
+                }
+            )
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // 应用图标
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(HiCarPrimary, HiCarPrimaryDark)
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = app.name.take(1),
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 应用名称
         Text(
-            text = title,
-            fontSize = fontSize,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = app.name,
+            color = HiCarTextPrimary,
+            fontSize = 12.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
         )
+    }
+
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            kotlinx.coroutines.delay(100)
+            isPressed = false
+        }
     }
 }
 
 @Composable
-private fun BottomNavigation(
+private fun HiCarDockBar(
     selectedTab: BottomNavTab,
-    onTabSelected: (BottomNavTab) -> Unit,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
+    onTabSelected: (BottomNavTab) -> Unit
 ) {
-    val padding = screenDims.scaledSize(8.dp)
-    
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shadowElevation = 4.dp
+        color = HiCarDockBackground,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = padding),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            BottomNavItem(
-                icon = Icons.Default.Home,
+            HiCarDockItem(
+                icon = Icons.Outlined.Home,
+                activeIcon = Icons.Filled.Home,
                 label = "首页",
                 isSelected = selectedTab == BottomNavTab.Home,
-                onClick = { onTabSelected(BottomNavTab.Home) },
-                screenDims = screenDims
+                onClick = { onTabSelected(BottomNavTab.Home) }
             )
-            BottomNavItem(
-                icon = Icons.Default.LocationOn,
+
+            HiCarDockItem(
+                icon = Icons.Outlined.Navigation,
+                activeIcon = Icons.Filled.Navigation,
                 label = "导航",
                 isSelected = selectedTab == BottomNavTab.Navigation,
                 onClick = { onTabSelected(BottomNavTab.Navigation) },
-                screenDims = screenDims
+                accentColor = HiCarAccentOrange
             )
-            BottomNavItem(
-                icon = Icons.Default.MusicNote,
+
+            HiCarDockItem(
+                icon = Icons.Outlined.MusicNote,
+                activeIcon = Icons.Filled.MusicNote,
                 label = "音乐",
                 isSelected = selectedTab == BottomNavTab.Music,
                 onClick = { onTabSelected(BottomNavTab.Music) },
-                screenDims = screenDims
+                accentColor = HiCarPrimaryLight
             )
-            BottomNavItem(
-                icon = Icons.Default.VideoLibrary,
+
+            HiCarDockItem(
+                icon = Icons.Outlined.VideoLibrary,
+                activeIcon = Icons.Filled.VideoLibrary,
                 label = "视频",
                 isSelected = selectedTab == BottomNavTab.Video,
-                onClick = { onTabSelected(BottomNavTab.Video) },
-                screenDims = screenDims
+                onClick = { onTabSelected(BottomNavTab.Video) }
             )
-            BottomNavItem(
-                icon = Icons.Default.Settings,
+
+            HiCarDockItem(
+                icon = Icons.Outlined.Settings,
+                activeIcon = Icons.Filled.Settings,
                 label = "设置",
                 isSelected = selectedTab == BottomNavTab.Settings,
-                onClick = { onTabSelected(BottomNavTab.Settings) },
-                screenDims = screenDims
+                onClick = { onTabSelected(BottomNavTab.Settings) }
             )
         }
     }
 }
 
 @Composable
-private fun BottomNavItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun HiCarDockItem(
+    icon: ImageVector,
+    activeIcon: ImageVector,
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    screenDims: com.autohub.launcher.ui.theme.ScreenDimensions
+    accentColor: Color = HiCarPrimary
 ) {
-    val iconSize = screenDims.iconSize
-    val fontSize = with(screenDims) { scaledSize(10.sp.value.dp).value.sp }
-    
+    val iconColor by animateColorAsState(
+        targetValue = if (isSelected) accentColor else HiCarDockItemInactive,
+        label = "iconColor"
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (isSelected) accentColor else HiCarDockItemInactive,
+        label = "labelColor"
+    )
+
     Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        IconButton(onClick = onClick, modifier = Modifier.size(iconSize * 2)) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(iconSize)
-            )
-        }
+        Icon(
+            imageVector = if (isSelected) activeIcon else icon,
+            contentDescription = label,
+            tint = iconColor,
+            modifier = Modifier.size(28.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
-            fontSize = fontSize,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            color = labelColor,
+            fontSize = 11.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
         )
     }
 }
+
+// Extension function for offset
+private fun Modifier.offset(x: androidx.compose.ui.unit.Dp): Modifier = this.then(
+    Modifier.padding(end = x)
+)

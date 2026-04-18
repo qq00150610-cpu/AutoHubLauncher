@@ -55,6 +55,7 @@ fun AppScreen(
 
 /**
  * MainScreen 容器
+ * 直接使用 MainViewModel 来处理所有导航逻辑
  */
 @Composable
 private fun MainScreenContainer(
@@ -65,10 +66,10 @@ private fun MainScreenContainer(
     
     MainScreen(
         viewModel = mainViewModel,
-        onNavigateToSettings = { },
-        onNavigateToNavigation = { },
-        onNavigateToMusic = { },
-        onNavigateToVideo = { },
+        onNavigateToSettings = { mainViewModel.openSettings() },
+        onNavigateToNavigation = { mainViewModel.openNavigationApp() },
+        onNavigateToMusic = { mainViewModel.openMusicApp() },
+        onNavigateToVideo = { mainViewModel.openVideoApp() },
         onNavigateToProfile = onNavigateToProfile
     )
 }
