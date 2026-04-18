@@ -103,14 +103,14 @@
     volatile <fields>;
 }
 
-# Remove logging in release
--assumenosideeffects class android.util.Log {
-    public static int v(...);
-    public static int d(...);
-    public static int i(...);
-    public static int w(...);
-    public static int e(...);
-}
+# Remove logging in release - 注释掉以便调试崩溃
+#-assumenosideeffects class android.util.Log {
+#    public static int v(...);
+#    public static int d(...);
+#    public static int i(...);
+#    public static int w(...);
+#    public static int e(...);
+#}
 
 # Keep application class
 -keep class com.autohub.launcher.AutoHubApplication { *; }
@@ -144,3 +144,16 @@
 
 # Keep Adapters
 -keep class com.autohub.launcher.data.adapter.** { *; }
+
+
+# Keep WeChat SDK
+-keep class com.tencent.mm.** { *; }
+-dontwarn com.tencent.mm.**
+-keep class com.tencent.wx.** { *; }
+-dontwarn com.tencent.wx.**
+
+# Keep DataStore delegate
+-keep class * extends androidx.datastore.preferences.core.PreferencesSerializer
+-keepclassmembers class * {
+    *** getDataStore(...);
+}

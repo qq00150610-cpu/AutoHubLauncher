@@ -4,7 +4,9 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import android.os.Process
 import dagger.hilt.android.HiltAndroidApp
+import java.lang.Thread.UncaughtExceptionHandler
 
 @HiltAndroidApp
 class AutoHubApplication : Application() {
@@ -18,7 +20,25 @@ class AutoHubApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        
+        // 设置全局异常处理器
+        setupExceptionHandler()
+        
         createNotificationChannels()
+    }
+
+    private fun setupExceptionHandler() {
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            // 记录异常信息
+            android.util.Log.e("AutoHub", "Uncaught exception", throwable)
+            
+            // 调用默认处理器
+            defaultHandler?.uncaughtException(thread, throwable) ?: run {
+                Process.killProcess(Process.myPid())
+                System.exit(1)
+            }
+        }
     }
 
     private fun createNotificationChannels() {

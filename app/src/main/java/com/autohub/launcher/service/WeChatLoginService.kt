@@ -5,7 +5,6 @@ import android.content.Context
 import com.autohub.launcher.data.model.WeChatLoginResponse
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
-import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -28,25 +27,39 @@ class WeChatLoginService @Inject constructor(
         private const val WECHAT_APP_ID = "wx1234567890abcdef"
     }
 
-    // IWXAPI 实例
-    private val wxApi: IWXAPI by lazy {
-        WXAPIFactory.createWXAPI(context, WECHAT_APP_ID, true).apply {
-            registerApp(WECHAT_APP_ID)
+    // IWXAPI 实例 - 延迟初始化并添加异常处理
+    private var wxApi: IWXAPI? = null
+
+    private fun getWxApi(): IWXAPI? {
+        if (wxApi == null) {
+            try {
+                wxApi = WXAPIFactory.createWXAPI(context, WECHAT_APP_ID, true).apply {
+                    registerApp(WECHAT_APP_ID)
+                }
+            } catch (e: Exception) {
+                // 微信SDK初始化失败，返回null
+            }
         }
+        return wxApi
     }
 
     /**
      * 检查微信是否已安装
      */
     fun isWeChatInstalled(): Boolean {
-        return wxApi.isWXAppInstalled
+        return try {
+            getWxApi()?.isWXAppInstalled ?: false
+        } catch (e: Exception) {
+            false
+        }
     }
 
     /**
      * 启动微信登录
      */
     fun startWeChatLogin(activity: Activity) {
-        if (!isWeChatInstalled()) {
+        val api = getWxApi()
+        if (api == null || !api.isWXAppInstalled) {
             throw WeChatNotInstalledException()
         }
 
@@ -54,7 +67,7 @@ class WeChatLoginService @Inject constructor(
             scope = "snsapi_userinfo"
             state = generateState()
         }
-        wxApi.sendReq(request)
+        api.sendReq(request)
     }
 
     /**

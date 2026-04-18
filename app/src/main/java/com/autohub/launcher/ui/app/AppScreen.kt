@@ -19,7 +19,6 @@ fun AppScreen(
     val isLoggedIn by appViewModel.isLoggedIn.collectAsState(initial = false)
     var showLogin by remember { mutableStateOf(!isLoggedIn) }
     var showProfile by remember { mutableStateOf(false) }
-    val mainViewModel: MainViewModel = hiltViewModel()
 
     LaunchedEffect(isLoggedIn) {
         showLogin = !isLoggedIn
@@ -48,18 +47,33 @@ fun AppScreen(
             )
         }
         else -> {
-            MainScreen(
-                viewModel = mainViewModel,
-                onNavigateToSettings = { /* Navigate to settings */ },
-                onNavigateToNavigation = { /* Navigate to navigation */ },
-                onNavigateToMusic = { /* Navigate to music */ },
-                onNavigateToVideo = { /* Navigate to video */ },
+            // 只在需要时创建 MainViewModel
+            MainScreenContainer(
                 onNavigateToProfile = {
                     showProfile = true
                 }
             )
         }
     }
+}
+
+/**
+ * MainScreen 容器，延迟创建 ViewModel
+ */
+@Composable
+private fun MainScreenContainer(
+    onNavigateToProfile: () -> Unit
+) {
+    val mainViewModel: MainViewModel = hiltViewModel()
+    
+    MainScreen(
+        viewModel = mainViewModel,
+        onNavigateToSettings = { /* Navigate to settings */ },
+        onNavigateToNavigation = { /* Navigate to navigation */ },
+        onNavigateToMusic = { /* Navigate to music */ },
+        onNavigateToVideo = { /* Navigate to video */ },
+        onNavigateToProfile = onNavigateToProfile
+    )
 }
 
 /**
