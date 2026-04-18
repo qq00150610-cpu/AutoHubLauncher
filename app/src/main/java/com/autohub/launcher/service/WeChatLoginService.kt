@@ -3,102 +3,35 @@ package com.autohub.launcher.service
 import android.app.Activity
 import android.content.Context
 import com.autohub.launcher.data.model.WeChatLoginResponse
-import com.tencent.mm.opensdk.modelmsg.SendAuth
-import com.tencent.mm.opensdk.openapi.IWXAPI
-import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
- * 微信登录服务
- * 注意：微信SDK集成需要配置微信开放平台AppID
- * 当前为简化实现，仅提供框架代码
+ * 微信登录服务 - 简化版本
+ * 注意：微信SDK已移除，微信登录功能暂时禁用
  */
 @Singleton
 class WeChatLoginService @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    companion object {
-        // TODO: 替换为实际的微信开放平台AppID
-        private const val WECHAT_APP_ID = "wx1234567890abcdef"
-    }
-
-    // IWXAPI 实例 - 延迟初始化并添加异常处理
-    private var wxApi: IWXAPI? = null
-
-    private fun getWxApi(): IWXAPI? {
-        if (wxApi == null) {
-            try {
-                wxApi = WXAPIFactory.createWXAPI(context, WECHAT_APP_ID, true).apply {
-                    registerApp(WECHAT_APP_ID)
-                }
-            } catch (e: Exception) {
-                // 微信SDK初始化失败，返回null
-            }
-        }
-        return wxApi
-    }
-
     /**
-     * 检查微信是否已安装
+     * 检查微信是否已安装 - 始终返回false
      */
-    fun isWeChatInstalled(): Boolean {
-        return try {
-            getWxApi()?.isWXAppInstalled ?: false
-        } catch (e: Exception) {
-            false
-        }
-    }
+    fun isWeChatInstalled(): Boolean = false
 
     /**
-     * 启动微信登录
+     * 启动微信登录 - 抛出异常
      */
     fun startWeChatLogin(activity: Activity) {
-        val api = getWxApi()
-        if (api == null || !api.isWXAppInstalled) {
-            throw WeChatNotInstalledException()
-        }
-
-        val request = SendAuth.Req().apply {
-            scope = "snsapi_userinfo"
-            state = generateState()
-        }
-        api.sendReq(request)
+        throw WeChatNotInstalledException()
     }
 
     /**
      * 处理微信登录回调
      */
-    suspend fun handleLoginResult(resp: SendAuth.Resp): Result<WeChatLoginResponse> {
-        return suspendCancellableCoroutine { continuation ->
-            if (resp.errCode == 0) { // ErrCode.ERR_OK
-                val response = WeChatLoginResponse(
-                    openId = resp.openId ?: "",
-                    unionId = null,
-                    accessToken = resp.code ?: ""
-                )
-                continuation.resume(Result.success(response))
-            } else {
-                val errorMsg = when (resp.errCode) {
-                    -1 -> "微信签名配置错误"
-                    -2 -> "用户取消"
-                    else -> "微信登录失败: ${resp.errStr}"
-                }
-                continuation.resumeWithException(WeChatLoginException(errorMsg))
-            }
-        }
-    }
-
-    /**
-     * 生成随机State参数
-     */
-    private fun generateState(): String {
-        val chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return (1..32).map { chars.random() }.joinToString("")
+    suspend fun handleLoginResult(resp: Any): Result<WeChatLoginResponse> {
+        return Result.failure(WeChatLoginException("微信登录暂不可用"))
     }
 }
 

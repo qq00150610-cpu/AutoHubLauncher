@@ -1,15 +1,10 @@
 package com.autohub.launcher.ui.auth
 
 import android.app.Activity
-import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.autohub.launcher.data.model.LoginResponse
 import com.autohub.launcher.data.repository.UserRepository
-import com.autohub.launcher.service.WeChatLoginException
-import com.autohub.launcher.service.WeChatLoginService
-import com.tencent.mm.opensdk.modelmsg.SendAuth
-import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,8 +17,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val userRepository: UserRepository,
-    private val weChatLoginService: WeChatLoginService
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow<UiState<LoginResponse>>(UiState.Idle)
@@ -94,53 +88,10 @@ class LoginViewModel @Inject constructor(
     }
 
     /**
-     * 微信登录
+     * 微信登录 - 暂不可用
      */
     fun loginWithWeChat(activity: Activity) {
-        viewModelScope.launch {
-            _loginState.value = UiState.Loading
-            try {
-                // 检查是否安装微信
-                if (!weChatLoginService.isWeChatInstalled()) {
-                    _loginState.value = UiState.Error("未安装微信应用")
-                    return@launch
-                }
-
-                // 启动微信登录
-                weChatLoginService.startWeChatLogin(activity)
-
-                // 等待回调结果（这里简化处理，实际需要在Activity中处理回调）
-                // 实际使用时，需要在Activity的onActivityResult中处理微信返回的code
-                // 然后调用 handleWeChatLoginResult 方法
-            } catch (e: Exception) {
-                _loginState.value = UiState.Error(e.message ?: "微信登录失败")
-            }
-        }
-    }
-
-    /**
-     * 处理微信登录回调
-     */
-    fun handleWeChatLoginResult(resp: SendAuth.Resp) {
-        viewModelScope.launch {
-            _loginState.value = UiState.Loading
-            try {
-                val result = weChatLoginService.handleLoginResult(resp)
-                if (result.isSuccess) {
-                    val weChatResp = result.getOrNull()!!
-                    val loginResp = userRepository.loginWithWeChat(weChatResp.accessToken)
-                    if (loginResp.isSuccess) {
-                        _loginState.value = UiState.Success(loginResp.getOrNull()!!)
-                    } else {
-                        _loginState.value = UiState.Error(loginResp.exceptionOrNull()?.message ?: "登录失败")
-                    }
-                } else {
-                    _loginState.value = UiState.Error(result.exceptionOrNull()?.message ?: "微信登录失败")
-                }
-            } catch (e: Exception) {
-                _loginState.value = UiState.Error(e.message ?: "微信登录失败")
-            }
-        }
+        _loginState.value = UiState.Error("微信登录暂不可用")
     }
 
     /**

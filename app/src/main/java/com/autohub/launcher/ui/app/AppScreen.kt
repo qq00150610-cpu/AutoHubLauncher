@@ -1,7 +1,6 @@
 package com.autohub.launcher.ui.app
 
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.autohub.launcher.ui.auth.LoginScreen
 import com.autohub.launcher.ui.main.MainScreen
@@ -10,19 +9,14 @@ import com.autohub.launcher.ui.profile.ProfileScreen
 
 /**
  * 应用主界面
- * 管理登录状态和页面导航
+ * 直接进入主界面，登录是可选功能（用于解锁收费主题）
  */
 @Composable
 fun AppScreen(
     appViewModel: AppViewModel = hiltViewModel()
 ) {
-    val isLoggedIn by appViewModel.isLoggedIn.collectAsState(initial = false)
-    var showLogin by remember { mutableStateOf(!isLoggedIn) }
     var showProfile by remember { mutableStateOf(false) }
-
-    LaunchedEffect(isLoggedIn) {
-        showLogin = !isLoggedIn
-    }
+    var showLogin by remember { mutableStateOf(false) }
 
     when {
         showLogin -> {
@@ -31,7 +25,7 @@ fun AppScreen(
                     showLogin = false
                 },
                 onBackClick = {
-                    finishActivity()
+                    showLogin = false
                 }
             )
         }
@@ -47,10 +41,12 @@ fun AppScreen(
             )
         }
         else -> {
-            // 只在需要时创建 MainViewModel
             MainScreenContainer(
                 onNavigateToProfile = {
                     showProfile = true
+                },
+                onNavigateToLogin = {
+                    showLogin = true
                 }
             )
         }
@@ -58,20 +54,21 @@ fun AppScreen(
 }
 
 /**
- * MainScreen 容器，延迟创建 ViewModel
+ * MainScreen 容器
  */
 @Composable
 private fun MainScreenContainer(
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     val mainViewModel: MainViewModel = hiltViewModel()
     
     MainScreen(
         viewModel = mainViewModel,
-        onNavigateToSettings = { /* Navigate to settings */ },
-        onNavigateToNavigation = { /* Navigate to navigation */ },
-        onNavigateToMusic = { /* Navigate to music */ },
-        onNavigateToVideo = { /* Navigate to video */ },
+        onNavigateToSettings = { },
+        onNavigateToNavigation = { },
+        onNavigateToMusic = { },
+        onNavigateToVideo = { },
         onNavigateToProfile = onNavigateToProfile
     )
 }

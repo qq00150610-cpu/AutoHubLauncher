@@ -110,8 +110,8 @@ dependencies {
     ksp 'com.google.dagger:hilt-android-compiler:2.50'
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0'
 
-    // WeChat SDK
-    implementation 'com.tencent.mm.opensdk:wechat-sdk-android:6.8.0'
+    // WeChat SDK - 暂时移除
+    // implementation 'com.tencent.mm.opensdk:wechat-sdk-android:6.8.0'
 
     // DataStore
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
