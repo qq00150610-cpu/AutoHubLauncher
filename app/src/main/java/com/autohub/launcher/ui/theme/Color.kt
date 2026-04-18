@@ -2,6 +2,32 @@ package com.autohub.launcher.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// ==================== 新 UI 配色方案 ====================
+
+// 背景渐变 - 蓝紫色调
+val BgGradientStart = Color(0xFF1a1a2e)  // 深蓝
+val BgGradientEnd = Color(0xFF16213e)    // 深紫蓝
+
+// 弹窗背景 - 半透明深色
+val CardBackground = Color(0xCC1a1a2e)   // 半透明深色
+val CardBackgroundLight = Color(0x80FFFFFF)  // 半透明白
+
+// 强调色
+val AccentBlue = Color(0xFF00d4ff)       // 青蓝色
+val AccentOrange = Color(0xFFff6b35)     // 橙色
+val AccentGreen = Color(0xFF00ff88)      // 青绿色
+
+// 文字颜色
+val TextPrimary = Color.White
+val TextSecondary = Color(0xFF9e9e9e)    // 灰色
+val TextAccent = Color(0xFF00ff88)       // 青绿色
+
+// 底部栏
+val BottomBarBackground = Color(0xFF1a1a2e)  // 深色底栏
+val BottomBarIcon = Color(0x99FFFFFF)     // 半透明白
+
+// ==================== 原有 HiCar 配色保留 ====================
+
 // HiCar 风格深色主题配色
 // 主背景色 - 深蓝渐变
 val HiCarBackgroundDark = Color(0xFF0A1628)        // 深夜蓝
@@ -74,7 +100,7 @@ val BackgroundDark = HiCarBackgroundDark
 val SurfaceLight = Color(0xFFFFFFFF)
 val SurfaceDark = HiCarBackgroundCard
 
-val TextPrimary = HiCarTextPrimary
-val TextSecondary = HiCarTextSecondary
-val TextHint = HiCarTextHint
+val TextPrimaryCompat = HiCarTextPrimary
+val TextSecondaryCompat = HiCarTextSecondary
+val TextHintCompat = HiCarTextHint
 val TextOnPrimary = Color(0xFFFFFFFF)
