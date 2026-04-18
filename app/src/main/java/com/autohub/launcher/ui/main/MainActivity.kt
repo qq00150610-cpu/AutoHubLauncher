@@ -3,6 +3,7 @@ package com.autohub.launcher.ui.main
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -40,16 +41,28 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Start floating ball service
-        startFloatingBallService()
+        // Start floating ball service only if permission granted
+        startFloatingBallServiceIfPermitted()
+    }
+
+    private fun startFloatingBallServiceIfPermitted() {
+        // 检查悬浮窗权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
+            startFloatingBallService()
+        }
+        // 如果没有权限，暂时不启动悬浮球服务，等待用户授权
     }
 
     private fun startFloatingBallService() {
-        val intent = Intent(this, FloatingBallService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+        try {
+            val intent = Intent(this, FloatingBallService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        } catch (e: Exception) {
+            // 忽略启动失败，不影响主界面
         }
     }
 

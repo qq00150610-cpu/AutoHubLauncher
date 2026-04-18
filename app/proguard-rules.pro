@@ -114,3 +114,33 @@
 
 # Keep application class
 -keep class com.autohub.launcher.AutoHubApplication { *; }
+
+
+# Keep Hilt injected classes
+-keep class com.autohub.launcher.** { *; }
+-keep @dagger.hilt.android.lifecycle.HiltViewModel class *
+-keep class * extends androidx.lifecycle.ViewModel
+
+# Keep Hilt components
+-keep,allowobfuscation,allowshrinking class com.autohub.launcher.di.** { *; }
+-keep,allowobfuscation,allowshrinking class * extends dagger.hilt.android.internal.managers.ServiceComponentManager { *; }
+
+# Keep Services with Hilt
+-keep class com.autohub.launcher.service.** { *; }
+
+# Keep DataStore
+-keep class androidx.datastore.** { *; }
+-keep class * extends androidx.datastore.core.Serializer
+
+# Keep all ViewModels
+-keep class * extends androidx.lifecycle.ViewModel { *; }
+-keep class * extends androidx.lifecycle.AndroidViewModel { *; }
+
+# Keep UseCases
+-keep class com.autohub.launcher.domain.usecase.** { *; }
+
+# Keep Repositories
+-keep class com.autohub.launcher.data.repository.** { *; }
+
+# Keep Adapters
+-keep class com.autohub.launcher.data.adapter.** { *; }

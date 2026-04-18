@@ -1,6 +1,5 @@
 package com.autohub.launcher.service
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -9,12 +8,12 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.ImageView
 import androidx.core.app.NotificationCompat
 import com.autohub.launcher.R
 import com.autohub.launcher.AutoHubApplication
@@ -24,8 +23,8 @@ import dagger.hilt.android.AndroidEntryPoint
 class FloatingBallService : Service() {
 
     private lateinit var windowManager: WindowManager
-    private lateinit var floatingBallView: View
-    private lateinit var floatingBallParams: WindowManager.LayoutParams
+    private var floatingBallView: View? = null
+    private var floatingBallParams: WindowManager.LayoutParams? = null
 
     private var initialX = 0
     private var initialY = 0
@@ -35,62 +34,75 @@ class FloatingBallService : Service() {
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        createFloatingBall()
-        startForegroundService()
+        
+        // 先启动前台服务通知
+        startForegroundServiceNotification()
+        
+        // 检查悬浮窗权限后再创建悬浮球
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && Settings.canDrawOverlays(this)) {
+            createFloatingBall()
+        }
     }
 
     private fun createFloatingBall() {
-        val layoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        floatingBallView = layoutInflater.inflate(R.layout.floating_ball, null)
+        try {
+            val layoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            floatingBallView = layoutInflater.inflate(R.layout.floating_ball, null)
 
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                WindowManager.LayoutParams.TYPE_PHONE
-            },
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    WindowManager.LayoutParams.TYPE_PHONE
+                },
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
 
-        params.gravity = Gravity.TOP or Gravity.END
-        params.x = 100
-        params.y = 200
+            params.gravity = Gravity.TOP or Gravity.END
+            params.x = 100
+            params.y = 200
 
-        floatingBallParams = params
-        windowManager.addView(floatingBallView, params)
+            floatingBallParams = params
+            windowManager.addView(floatingBallView, params)
 
-        setupTouchListener()
+            setupTouchListener()
+        } catch (e: Exception) {
+            // 权限不足或其他错误，停止服务
+            floatingBallView = null
+            stopSelf()
+        }
     }
 
     private fun setupTouchListener() {
-        floatingBallView.setOnTouchListener { view, event ->
+        floatingBallView?.setOnTouchListener { view, event ->
+            val params = floatingBallParams ?: return@setOnTouchListener false
+            
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    initialX = floatingBallParams.x
-                    initialY = floatingBallParams.y
+                    initialX = params.x
+                    initialY = params.y
                     initialTouchX = event.rawX
                     initialTouchY = event.rawY
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    floatingBallParams.x = initialX + (event.rawX - initialTouchX).toInt()
-                    floatingBallParams.y = initialY + (event.rawY - initialTouchY).toInt()
-                    windowManager.updateViewLayout(floatingBallView, floatingBallParams)
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(floatingBallView, params)
                     true
                 }
                 MotionEvent.ACTION_UP -> {
                     val screenWidth = resources.displayMetrics.widthPixels
-                    val screenHeight = resources.displayMetrics.heightPixels
-                    val viewHalfWidth = floatingBallView.width / 2
+                    val viewHalfWidth = floatingBallView?.width?.div(2) ?: 0
 
                     // Snap to edge
-                    if (floatingBallParams.x < screenWidth / 2) {
-                        floatingBallParams.x = 0
+                    if (params.x < screenWidth / 2) {
+                        params.x = 0
                     } else {
-                        floatingBallParams.x = screenWidth - viewHalfWidth * 2
+                        params.x = screenWidth - viewHalfWidth * 2
                     }
 
                     // Check if it was a click (minimal movement)
@@ -99,9 +111,9 @@ class FloatingBallService : Service() {
 
                     if (deltaX < 10 && deltaY < 10) {
                         // It was a click
-                        handleBallClick(view)
+                        handleBallClick()
                     } else {
-                        windowManager.updateViewLayout(floatingBallView, floatingBallParams)
+                        windowManager.updateViewLayout(floatingBallView, params)
                     }
                     true
                 }
@@ -110,21 +122,12 @@ class FloatingBallService : Service() {
         }
     }
 
-    private fun handleBallClick(view: View) {
+    private fun handleBallClick() {
         // Show quick actions menu
         // TODO: Implement quick actions menu
-        showQuickActionsMenu()
     }
 
-    private fun showQuickActionsMenu() {
-        // TODO: Show a popup menu with actions:
-        // - Back
-        // - Home
-        // - Music
-        // - Recent apps
-    }
-
-    private fun startForegroundService() {
+    private fun startForegroundServiceNotification() {
         val notification = NotificationCompat.Builder(this, AutoHubApplication.NOTIFICATION_CHANNEL_ID_SERVICE)
             .setContentTitle("AutoHub 悬浮球")
             .setContentText("悬浮球正在运行")
@@ -142,10 +145,13 @@ class FloatingBallService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         try {
-            windowManager.removeView(floatingBallView)
+            floatingBallView?.let {
+                windowManager.removeView(it)
+            }
         } catch (e: Exception) {
             // View already removed
         }
+        floatingBallView = null
     }
 
     companion object {
